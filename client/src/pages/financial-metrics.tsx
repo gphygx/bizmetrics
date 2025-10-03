@@ -228,8 +228,8 @@ export default function FinancialMetrics() {
       setTimeout(() => {
         const element = document.getElementById(hash);
         if (element) {
-          const elementPosition = element.getBoundingClientRect().top;
-          const offsetPosition = elementPosition + window.pageYOffset - 80; // 80px offset for header/spacing
+          const elementPosition = element.getBoundingClientRect().top + window.scrollY;
+          const offsetPosition = elementPosition - 80; // 80px offset for header/spacing
           
           window.scrollTo({
             top: offsetPosition,
