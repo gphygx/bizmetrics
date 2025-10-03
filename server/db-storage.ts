@@ -1,7 +1,7 @@
 import { drizzle } from 'drizzle-orm/neon-serverless';
 import { Pool, neonConfig } from '@neondatabase/serverless';
 import { eq, and, gte, lte, desc } from 'drizzle-orm';
-import { users, companies, financialData, type User, type InsertUser, type Company, type InsertCompany, type FinancialData, type InsertFinancialData } from '@shared/schema';
+import { users, companies, financialData, metricAlerts, type User, type InsertUser, type Company, type InsertCompany, type FinancialData, type InsertFinancialData, type MetricAlert, type InsertMetricAlert } from '@shared/schema';
 import type { IStorage } from './storage';
 import ws from 'ws';
 
@@ -79,5 +79,32 @@ export class DbStorage implements IStorage {
         )
       )
       .orderBy(financialData.period);
+  }
+
+  async getMetricAlerts(companyId: string): Promise<MetricAlert[]> {
+    return await db.select().from(metricAlerts)
+      .where(eq(metricAlerts.companyId, companyId));
+  }
+
+  async getMetricAlert(id: string): Promise<MetricAlert | undefined> {
+    const result = await db.select().from(metricAlerts)
+      .where(eq(metricAlerts.id, id))
+      .limit(1);
+    return result[0];
+  }
+
+  async createOrUpdateMetricAlert(alert: InsertMetricAlert): Promise<MetricAlert> {
+    const result = await db.insert(metricAlerts)
+      .values(alert)
+      .onConflictDoUpdate({
+        target: [metricAlerts.companyId, metricAlerts.metricName],
+        set: { ...alert, updatedAt: new Date() }
+      })
+      .returning();
+    return result[0];
+  }
+
+  async deleteMetricAlert(id: string): Promise<void> {
+    await db.delete(metricAlerts).where(eq(metricAlerts.id, id));
   }
 }

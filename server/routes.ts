@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertFinancialDataSchema } from "@shared/schema";
+import { insertFinancialDataSchema, insertMetricAlertSchema } from "@shared/schema";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -131,6 +131,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(historicalMetrics);
     } catch (error) {
       console.error("Error fetching historical metrics:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // Metric Alerts CRUD
+  app.get("/api/alerts/:companyId", async (req, res) => {
+    try {
+      const { companyId } = req.params;
+      const alerts = await storage.getMetricAlerts(companyId);
+      res.json(alerts);
+    } catch (error) {
+      console.error("Error fetching alerts:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.post("/api/alerts", async (req, res) => {
+    try {
+      const validatedData = insertMetricAlertSchema.parse(req.body);
+      const alert = await storage.createOrUpdateMetricAlert(validatedData);
+      res.json(alert);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid data", errors: error.errors });
+      }
+      console.error("Error creating alert:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.delete("/api/alerts/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      await storage.deleteMetricAlert(id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting alert:", error);
       res.status(500).json({ message: "Internal server error" });
     }
   });

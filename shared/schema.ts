@@ -16,6 +16,19 @@ export const companies = pgTable("companies", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const metricAlerts = pgTable("metric_alerts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  companyId: varchar("company_id").references(() => companies.id).notNull(),
+  metricName: text("metric_name").notNull(), // e.g., "revenue", "netProfitMargin"
+  threshold: decimal("threshold", { precision: 15, scale: 2 }).notNull(),
+  condition: text("condition").notNull(), // "above", "below"
+  isEnabled: integer("is_enabled").default(1).notNull(), // 1 = enabled, 0 = disabled
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => ({
+  uniqueCompanyMetric: unique().on(table.companyId, table.metricName),
+}));
+
 export const financialData = pgTable("financial_data", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   companyId: varchar("company_id").references(() => companies.id).notNull(),
@@ -72,9 +85,17 @@ export const insertFinancialDataSchema = createInsertSchema(financialData).omit(
   updatedAt: true,
 });
 
+export const insertMetricAlertSchema = createInsertSchema(metricAlerts).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type InsertCompany = z.infer<typeof insertCompanySchema>;
 export type Company = typeof companies.$inferSelect;
 export type InsertFinancialData = z.infer<typeof insertFinancialDataSchema>;
 export type FinancialData = typeof financialData.$inferSelect;
+export type InsertMetricAlert = z.infer<typeof insertMetricAlertSchema>;
+export type MetricAlert = typeof metricAlerts.$inferSelect;

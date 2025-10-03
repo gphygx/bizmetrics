@@ -35,12 +35,17 @@ Preferred communication style: Simple, everyday language.
 - `GET /api/financial-data/:companyId` - Get financial data for a company, optionally filtered by period
 - `GET /api/financial-data/:companyId/:period` - Get specific period's financial data
 - `POST /api/financial-data` - Create or update financial data entries
+- `GET /api/metrics/:companyId` - Get calculated metrics with optional period comparison
+- `GET /api/metrics/:companyId/history` - Get historical metrics for charts
+- `GET /api/alerts/:companyId` - Get metric alerts for a company
+- `POST /api/alerts` - Create or update a metric alert
+- `DELETE /api/alerts/:id` - Delete a metric alert
 
 **Development Mode**: In development, Vite middleware is integrated into Express for hot module replacement and efficient asset serving. The server uses source maps for better debugging with the `@jridgewell/trace-mapping` package.
 
 **Request Logging**: Custom middleware logs API requests with method, path, status code, response time, and truncated response bodies for debugging purposes.
 
-**Storage Layer**: An abstraction layer (`IStorage` interface) separates business logic from data persistence. Currently implements `MemStorage` for in-memory storage with sample data, designed to be swapped with a database-backed implementation.
+**Storage Layer**: An abstraction layer (`IStorage` interface) separates business logic from data persistence. The application now uses `DbStorage` for PostgreSQL database persistence via Neon serverless, replacing the previous in-memory storage implementation.
 
 ### Data Storage
 
@@ -49,12 +54,14 @@ Preferred communication style: Simple, everyday language.
 **Database Schema** (defined in `shared/schema.ts`):
 - **users**: User accounts with username/password authentication
 - **companies**: Companies owned by users, with one-to-many relationship
-- **financial_data**: Comprehensive financial records per company and time period, including:
+- **financial_data**: Comprehensive financial records per company and time period (unique constraint on company_id + period), including:
   - Income statement metrics (revenue, gross profit, net income, operating income, COGS, operating expenses)
   - Balance sheet data (assets, liabilities, equity, accounts receivable/payable, inventory)
   - Cash flow statements (operating, investing, financing cash flows)
   - Additional business metrics (marketing spend, customer acquisition)
   - Period tracking (monthly, quarterly, yearly)
+- **metric_alerts**: User-configured threshold alerts for key metrics (unique constraint on company_id + metric_name):
+  - Metric name, threshold value, condition (above/below), enabled status
 
 **Database Provider**: Neon serverless PostgreSQL driver (`@neondatabase/serverless`) enables connection pooling and serverless-optimized database access.
 
@@ -83,6 +90,7 @@ Preferred communication style: Simple, everyday language.
 
 **UI Component Libraries**: 
 - Radix UI primitives for accessible, unstyled components
+- Recharts for interactive charts and data visualization
 - Embla Carousel for carousel functionality
 - cmdk for command menu interface
 - React Hook Form with Hookform Resolvers for form handling
@@ -91,6 +99,24 @@ Preferred communication style: Simple, everyday language.
 - `date-fns` for date manipulation and formatting
 - `class-variance-authority` and `clsx` for conditional CSS class composition
 - `nanoid` for generating unique IDs
+
+### Recent Features (October 2025)
+
+**Database Migration**: Successfully migrated from in-memory storage to PostgreSQL database with:
+- Unique constraints on financial data (company_id, period) to prevent duplicates
+- Unique constraints on metric alerts (company_id, metric_name)
+- Upsert patterns using Drizzle's onConflictDoUpdate for data integrity
+
+**Interactive Charts**: Added collapsible historical trends section featuring:
+- 6 line charts visualizing key metrics over time (Revenue, Net Profit Margin, Operating Cash Flow, ROE, Current Ratio, Debt-to-Equity)
+- Lazy loading - charts only fetch data when expanded
+- Built with Recharts and shadcn chart components
+- Historical data API endpoint serving time-series metrics
+
+**Alert System Backend**: Implemented foundation for customizable metric alerts:
+- Database schema for storing alert configurations per company and metric
+- CRUD API endpoints for managing alerts
+- Frontend UI integration pending (scheduled as next development phase)
 
 **Development Tools** (Replit-specific):
 - `@replit/vite-plugin-runtime-error-modal` for error overlays

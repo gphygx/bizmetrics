@@ -1,4 +1,4 @@
-import { type User, type InsertUser, type Company, type InsertCompany, type FinancialData, type InsertFinancialData } from "@shared/schema";
+import { type User, type InsertUser, type Company, type InsertCompany, type FinancialData, type InsertFinancialData, type MetricAlert, type InsertMetricAlert } from "@shared/schema";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
@@ -17,6 +17,12 @@ export interface IStorage {
   getFinancialDataByPeriod(companyId: string, period: string): Promise<FinancialData | undefined>;
   createOrUpdateFinancialData(data: InsertFinancialData): Promise<FinancialData>;
   getFinancialDataRange(companyId: string, startPeriod: string, endPeriod: string): Promise<FinancialData[]>;
+  
+  // Metric Alerts
+  getMetricAlerts(companyId: string): Promise<MetricAlert[]>;
+  getMetricAlert(id: string): Promise<MetricAlert | undefined>;
+  createOrUpdateMetricAlert(alert: InsertMetricAlert): Promise<MetricAlert>;
+  deleteMetricAlert(id: string): Promise<void>;
 }
 
 export class MemStorage implements IStorage {
