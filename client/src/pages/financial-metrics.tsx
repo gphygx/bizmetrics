@@ -277,20 +277,14 @@ export default function FinancialMetrics() {
 
         {/* Profitability Metrics */}
         <section id="profitability">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
-                <i className="fas fa-dollar-sign text-primary"></i>
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-foreground">Profitability Metrics</h3>
-                <p className="text-sm text-muted-foreground">Revenue and profit analysis</p>
-              </div>
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+              <i className="fas fa-dollar-sign text-primary"></i>
             </div>
-            <Badge className="bg-accent/10 text-accent hover:bg-accent/20" data-testid="status-profitability">
-              <i className="fas fa-circle text-xs mr-1"></i>
-              Healthy
-            </Badge>
+            <div>
+              <h3 className="text-lg font-semibold text-foreground">Profitability Metrics</h3>
+              <p className="text-sm text-muted-foreground">Revenue and profit analysis</p>
+            </div>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -311,9 +305,8 @@ export default function FinancialMetrics() {
                 </div>
                 <div className="flex items-center justify-between pt-3 border-t border-border">
                   <span className="text-xs text-muted-foreground">Target: 40%</span>
-                  <span className="status-indicator trend-up">
-                    <i className="fas fa-arrow-up text-xs"></i>
-                    <span className="text-xs font-medium">+1.8%</span>
+                  <span className={`px-2 py-1 rounded text-xs font-medium ${metrics.grossProfitMargin >= 40 ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-100' : 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-100'}`}>
+                    {metrics.grossProfitMargin >= 40 ? 'Healthy' : 'Warning'}
                   </span>
                 </div>
               </CardContent>
@@ -335,9 +328,8 @@ export default function FinancialMetrics() {
                 </div>
                 <div className="flex items-center justify-between pt-3 border-t border-border">
                   <span className="text-xs text-muted-foreground">Target: 10%</span>
-                  <span className="status-indicator trend-up">
-                    <i className="fas fa-arrow-up text-xs"></i>
-                    <span className="text-xs font-medium">+1.5%</span>
+                  <span className={`px-2 py-1 rounded text-xs font-medium ${metrics.roa >= 10 ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-100' : 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-100'}`}>
+                    {metrics.roa >= 10 ? 'Healthy' : 'Warning'}
                   </span>
                 </div>
               </CardContent>
@@ -359,9 +351,8 @@ export default function FinancialMetrics() {
                 </div>
                 <div className="flex items-center justify-between pt-3 border-t border-border">
                   <span className="text-xs text-muted-foreground">Target: $300</span>
-                  <span className="status-indicator trend-down">
-                    <i className="fas fa-arrow-down text-xs"></i>
-                    <span className="text-xs font-medium">-5.0%</span>
+                  <span className={`px-2 py-1 rounded text-xs font-medium ${metrics.cac <= 300 ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-100' : 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-100'}`}>
+                    {metrics.cac <= 300 ? 'Healthy' : 'Warning'}
                   </span>
                 </div>
               </CardContent>
@@ -383,9 +374,8 @@ export default function FinancialMetrics() {
                 </div>
                 <div className="flex items-center justify-between pt-3 border-t border-border">
                   <span className="text-xs text-muted-foreground">Target: 15%</span>
-                  <span className="status-indicator trend-up">
-                    <i className="fas fa-arrow-up text-xs"></i>
-                    <span className="text-xs font-medium">+2.3%</span>
+                  <span className={`px-2 py-1 rounded text-xs font-medium ${metrics.operatingMargin >= 15 ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-100' : 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-100'}`}>
+                    {metrics.operatingMargin >= 15 ? 'Healthy' : 'Warning'}
                   </span>
                 </div>
               </CardContent>
@@ -407,9 +397,8 @@ export default function FinancialMetrics() {
                 </div>
                 <div className="flex items-center justify-between pt-3 border-t border-border">
                   <span className="text-xs text-muted-foreground">Target: 20%</span>
-                  <span className="status-indicator trend-up">
-                    <i className="fas fa-arrow-up text-xs"></i>
-                    <span className="text-xs font-medium">+1.2%</span>
+                  <span className={`px-2 py-1 rounded text-xs font-medium ${metrics.ebitdaMargin >= 20 ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-100' : 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-100'}`}>
+                    {metrics.ebitdaMargin >= 20 ? 'Healthy' : 'Warning'}
                   </span>
                 </div>
               </CardContent>
@@ -419,20 +408,14 @@ export default function FinancialMetrics() {
 
         {/* Liquidity Metrics */}
         <section id="liquidity">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-chart-2/10 rounded-lg flex items-center justify-center">
-                <i className="fas fa-water text-chart-2"></i>
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-foreground">Liquidity Metrics</h3>
-                <p className="text-sm text-muted-foreground">Cash and working capital analysis</p>
-              </div>
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 bg-chart-2/10 rounded-lg flex items-center justify-center">
+              <i className="fas fa-water text-chart-2"></i>
             </div>
-            <Badge className="bg-chart-3/10 text-chart-3 hover:bg-chart-3/20" data-testid="status-liquidity">
-              <i className="fas fa-circle text-xs mr-1"></i>
-              Warning
-            </Badge>
+            <div>
+              <h3 className="text-lg font-semibold text-foreground">Liquidity Metrics</h3>
+              <p className="text-sm text-muted-foreground">Cash and working capital analysis</p>
+            </div>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -453,9 +436,8 @@ export default function FinancialMetrics() {
                 </div>
                 <div className="flex items-center justify-between pt-3 border-t border-border">
                   <span className="text-xs text-muted-foreground">Healthy: {'>'}1.5</span>
-                  <span className="status-indicator trend-up">
-                    <i className="fas fa-arrow-up text-xs"></i>
-                    <span className="text-xs font-medium">+0.2</span>
+                  <span className={`px-2 py-1 rounded text-xs font-medium ${metrics.currentRatio > 1.5 ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-100' : 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-100'}`}>
+                    {metrics.currentRatio > 1.5 ? 'Healthy' : 'Warning'}
                   </span>
                 </div>
               </CardContent>
@@ -477,9 +459,8 @@ export default function FinancialMetrics() {
                 </div>
                 <div className="flex items-center justify-between pt-3 border-t border-border">
                   <span className="text-xs text-muted-foreground">Healthy: {'>'}1.0</span>
-                  <span className="status-indicator trend-neutral">
-                    <i className="fas fa-minus text-xs"></i>
-                    <span className="text-xs font-medium">0.0</span>
+                  <span className={`px-2 py-1 rounded text-xs font-medium ${metrics.quickRatio > 1.0 ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-100' : 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-100'}`}>
+                    {metrics.quickRatio > 1.0 ? 'Healthy' : 'Warning'}
                   </span>
                 </div>
               </CardContent>
@@ -500,10 +481,9 @@ export default function FinancialMetrics() {
                   </div>
                 </div>
                 <div className="flex items-center justify-between pt-3 border-t border-border">
-                  <span className="text-xs text-muted-foreground">Last month: $580K</span>
-                  <span className="status-indicator trend-up">
-                    <i className="fas fa-arrow-up text-xs"></i>
-                    <span className="text-xs font-medium">+7.8%</span>
+                  <span className="text-xs text-muted-foreground">Positive required</span>
+                  <span className={`px-2 py-1 rounded text-xs font-medium ${metrics.workingCapital > 0 ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-100' : 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-100'}`}>
+                    {metrics.workingCapital > 0 ? 'Healthy' : 'Warning'}
                   </span>
                 </div>
               </CardContent>
@@ -525,9 +505,8 @@ export default function FinancialMetrics() {
                 </div>
                 <div className="flex items-center justify-between pt-3 border-t border-border">
                   <span className="text-xs text-muted-foreground">Target: {'<'}45 days</span>
-                  <span className="status-indicator trend-down">
-                    <i className="fas fa-arrow-down text-xs"></i>
-                    <span className="text-xs font-medium">-2 days</span>
+                  <span className={`px-2 py-1 rounded text-xs font-medium ${metrics.dso < 45 ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-100' : 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-100'}`}>
+                    {metrics.dso < 45 ? 'Healthy' : 'Warning'}
                   </span>
                 </div>
               </CardContent>
@@ -549,9 +528,8 @@ export default function FinancialMetrics() {
                 </div>
                 <div className="flex items-center justify-between pt-3 border-t border-border">
                   <span className="text-xs text-muted-foreground">Target: {'<'}60 days</span>
-                  <span className="status-indicator trend-down">
-                    <i className="fas fa-arrow-down text-xs"></i>
-                    <span className="text-xs font-medium">-3 days</span>
+                  <span className={`px-2 py-1 rounded text-xs font-medium ${metrics.ccc < 60 ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-100' : 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-100'}`}>
+                    {metrics.ccc < 60 ? 'Healthy' : 'Warning'}
                   </span>
                 </div>
               </CardContent>
@@ -561,20 +539,14 @@ export default function FinancialMetrics() {
 
         {/* Efficiency Metrics */}
         <section id="efficiency">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-chart-5/10 rounded-lg flex items-center justify-center">
-                <i className="fas fa-cogs text-chart-5"></i>
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-foreground">Efficiency Metrics</h3>
-                <p className="text-sm text-muted-foreground">Asset and operational efficiency</p>
-              </div>
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 bg-chart-5/10 rounded-lg flex items-center justify-center">
+              <i className="fas fa-cogs text-chart-5"></i>
             </div>
-            <Badge className="bg-accent/10 text-accent hover:bg-accent/20" data-testid="status-efficiency">
-              <i className="fas fa-circle text-xs mr-1"></i>
-              Good
-            </Badge>
+            <div>
+              <h3 className="text-lg font-semibold text-foreground">Efficiency Metrics</h3>
+              <p className="text-sm text-muted-foreground">Asset and operational efficiency</p>
+            </div>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -595,9 +567,8 @@ export default function FinancialMetrics() {
                 </div>
                 <div className="flex items-center justify-between pt-3 border-t border-border">
                   <span className="text-xs text-muted-foreground">Industry avg: 6.5x</span>
-                  <span className="status-indicator trend-up">
-                    <i className="fas fa-arrow-up text-xs"></i>
-                    <span className="text-xs font-medium">+0.8x</span>
+                  <span className={`px-2 py-1 rounded text-xs font-medium ${metrics.inventoryTurnover >= 6.5 ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-100' : 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-100'}`}>
+                    {metrics.inventoryTurnover >= 6.5 ? 'Healthy' : 'Warning'}
                   </span>
                 </div>
               </CardContent>
@@ -619,9 +590,8 @@ export default function FinancialMetrics() {
                 </div>
                 <div className="flex items-center justify-between pt-3 border-t border-border">
                   <span className="text-xs text-muted-foreground">Target: {'>'}8x</span>
-                  <span className="status-indicator trend-up">
-                    <i className="fas fa-arrow-up text-xs"></i>
-                    <span className="text-xs font-medium">+0.4x</span>
+                  <span className={`px-2 py-1 rounded text-xs font-medium ${metrics.arTurnover > 8 ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-100' : 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-100'}`}>
+                    {metrics.arTurnover > 8 ? 'Healthy' : 'Warning'}
                   </span>
                 </div>
               </CardContent>
@@ -643,9 +613,8 @@ export default function FinancialMetrics() {
                 </div>
                 <div className="flex items-center justify-between pt-3 border-t border-border">
                   <span className="text-xs text-muted-foreground">LTV/CAC: {formatNumber(metrics.ltv / metrics.cac, 1)}x</span>
-                  <span className="status-indicator trend-up">
-                    <i className="fas fa-arrow-up text-xs"></i>
-                    <span className="text-xs font-medium">+4.2%</span>
+                  <span className={`px-2 py-1 rounded text-xs font-medium ${(metrics.ltv / metrics.cac) > 3 ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-100' : 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-100'}`}>
+                    {(metrics.ltv / metrics.cac) > 3 ? 'Healthy' : 'Warning'}
                   </span>
                 </div>
               </CardContent>
@@ -667,9 +636,8 @@ export default function FinancialMetrics() {
                 </div>
                 <div className="flex items-center justify-between pt-3 border-t border-border">
                   <span className="text-xs text-muted-foreground">Industry avg: 7x</span>
-                  <span className="status-indicator trend-neutral">
-                    <i className="fas fa-minus text-xs"></i>
-                    <span className="text-xs font-medium">0.0x</span>
+                  <span className={`px-2 py-1 rounded text-xs font-medium ${metrics.apTurnover >= 7 ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-100' : 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-100'}`}>
+                    {metrics.apTurnover >= 7 ? 'Healthy' : 'Warning'}
                   </span>
                 </div>
               </CardContent>
@@ -691,9 +659,8 @@ export default function FinancialMetrics() {
                 </div>
                 <div className="flex items-center justify-between pt-3 border-t border-border">
                   <span className="text-xs text-muted-foreground">Target: {'>'}0.5x</span>
-                  <span className="status-indicator trend-up">
-                    <i className="fas fa-arrow-up text-xs"></i>
-                    <span className="text-xs font-medium">+0.1x</span>
+                  <span className={`px-2 py-1 rounded text-xs font-medium ${metrics.assetTurnover > 0.5 ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-100' : 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-100'}`}>
+                    {metrics.assetTurnover > 0.5 ? 'Healthy' : 'Warning'}
                   </span>
                 </div>
               </CardContent>
@@ -703,20 +670,14 @@ export default function FinancialMetrics() {
 
         {/* Leverage Metrics */}
         <section id="leverage">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-chart-4/10 rounded-lg flex items-center justify-center">
-                <i className="fas fa-balance-scale text-chart-4"></i>
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-foreground">Leverage Metrics</h3>
-                <p className="text-sm text-muted-foreground">Debt and equity ratios</p>
-              </div>
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 bg-chart-4/10 rounded-lg flex items-center justify-center">
+              <i className="fas fa-balance-scale text-chart-4"></i>
             </div>
-            <Badge className="bg-accent/10 text-accent hover:bg-accent/20" data-testid="status-leverage">
-              <i className="fas fa-circle text-xs mr-1"></i>
-              Moderate
-            </Badge>
+            <div>
+              <h3 className="text-lg font-semibold text-foreground">Leverage Metrics</h3>
+              <p className="text-sm text-muted-foreground">Debt and equity ratios</p>
+            </div>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -737,9 +698,8 @@ export default function FinancialMetrics() {
                 </div>
                 <div className="flex items-center justify-between pt-3 border-t border-border">
                   <span className="text-xs text-muted-foreground">Healthy: {'<'}2.0</span>
-                  <span className="status-indicator trend-down">
-                    <i className="fas fa-arrow-down text-xs"></i>
-                    <span className="text-xs font-medium">-0.15</span>
+                  <span className={`px-2 py-1 rounded text-xs font-medium ${metrics.debtToEquity < 2.0 ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-100' : 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-100'}`}>
+                    {metrics.debtToEquity < 2.0 ? 'Healthy' : 'Warning'}
                   </span>
                 </div>
               </CardContent>
@@ -761,9 +721,8 @@ export default function FinancialMetrics() {
                 </div>
                 <div className="flex items-center justify-between pt-3 border-t border-border">
                   <span className="text-xs text-muted-foreground">Healthy: {'<'}0.6</span>
-                  <span className="status-indicator trend-down">
-                    <i className="fas fa-arrow-down text-xs"></i>
-                    <span className="text-xs font-medium">-0.05</span>
+                  <span className={`px-2 py-1 rounded text-xs font-medium ${metrics.debtRatio < 0.6 ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-100' : 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-100'}`}>
+                    {metrics.debtRatio < 0.6 ? 'Healthy' : 'Warning'}
                   </span>
                 </div>
               </CardContent>
@@ -784,10 +743,9 @@ export default function FinancialMetrics() {
                   </div>
                 </div>
                 <div className="flex items-center justify-between pt-3 border-t border-border">
-                  <span className="text-xs text-muted-foreground">Last month: $250K</span>
-                  <span className="status-indicator trend-up">
-                    <i className="fas fa-arrow-up text-xs"></i>
-                    <span className="text-xs font-medium">+8.5%</span>
+                  <span className="text-xs text-muted-foreground">Positive required</span>
+                  <span className={`px-2 py-1 rounded text-xs font-medium ${metrics.freeCashFlow > 0 ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-100' : 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-100'}`}>
+                    {metrics.freeCashFlow > 0 ? 'Healthy' : 'Warning'}
                   </span>
                 </div>
               </CardContent>
@@ -809,9 +767,8 @@ export default function FinancialMetrics() {
                 </div>
                 <div className="flex items-center justify-between pt-3 border-t border-border">
                   <span className="text-xs text-muted-foreground">Target: {'>'}1.0</span>
-                  <span className="status-indicator trend-neutral">
-                    <i className="fas fa-minus text-xs"></i>
-                    <span className="text-xs font-medium">0.0</span>
+                  <span className={`px-2 py-1 rounded text-xs font-medium ${metrics.operatingCashFlowRatio > 1.0 ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-100' : 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-100'}`}>
+                    {metrics.operatingCashFlowRatio > 1.0 ? 'Healthy' : 'Warning'}
                   </span>
                 </div>
               </CardContent>
@@ -821,20 +778,14 @@ export default function FinancialMetrics() {
 
         {/* Growth Metrics */}
         <section id="growth">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-accent/10 rounded-lg flex items-center justify-center">
-                <i className="fas fa-arrow-trend-up text-accent"></i>
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-foreground">Growth Metrics</h3>
-                <p className="text-sm text-muted-foreground">Year-over-year performance</p>
-              </div>
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 bg-accent/10 rounded-lg flex items-center justify-center">
+              <i className="fas fa-arrow-trend-up text-accent"></i>
             </div>
-            <Badge className="bg-accent/10 text-accent hover:bg-accent/20" data-testid="status-growth">
-              <i className="fas fa-circle text-xs mr-1"></i>
-              Strong
-            </Badge>
+            <div>
+              <h3 className="text-lg font-semibold text-foreground">Growth Metrics</h3>
+              <p className="text-sm text-muted-foreground">Year-over-year performance</p>
+            </div>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
