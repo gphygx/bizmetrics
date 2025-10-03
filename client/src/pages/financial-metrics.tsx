@@ -183,15 +183,17 @@ export default function FinancialMetrics() {
                     <i className="fas fa-dollar-sign text-primary"></i>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className={`status-indicator ${metrics.changes?.revenueChange && metrics.changes.revenueChange > 0 ? 'trend-up' : 'trend-down'}`}>
-                    {renderTrendIcon(getTrendIcon(metrics.changes?.revenueChange))}
-                    <span className="text-sm font-medium">
-                      {formatPercentage(Math.abs(metrics.changes?.revenueChange || 0))}
+                {metrics.changes && comparePeriod !== 'none' && (
+                  <div className="flex items-center gap-2">
+                    <span className={`status-indicator ${metrics.changes?.revenueChange && metrics.changes.revenueChange > 0 ? 'trend-up' : 'trend-down'}`}>
+                      {renderTrendIcon(getTrendIcon(metrics.changes?.revenueChange))}
+                      <span className="text-sm font-medium">
+                        {formatPercentage(Math.abs(metrics.changes?.revenueChange || 0))}
+                      </span>
                     </span>
-                  </span>
-                  <span className="text-xs text-muted-foreground">vs last period</span>
-                </div>
+                    <span className="text-xs text-muted-foreground">vs last period</span>
+                  </div>
+                )}
               </CardContent>
             </Card>
             
@@ -209,15 +211,17 @@ export default function FinancialMetrics() {
                     <i className="fas fa-chart-line text-accent"></i>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className={`status-indicator ${metrics.changes?.netProfitMarginChange && metrics.changes.netProfitMarginChange > 0 ? 'trend-up' : 'trend-down'}`}>
-                    {renderTrendIcon(getTrendIcon(metrics.changes?.netProfitMarginChange))}
-                    <span className="text-sm font-medium">
-                      {metrics.changes?.netProfitMarginChange ? (metrics.changes.netProfitMarginChange > 0 ? '+' : '') + formatPercentage(Math.abs(metrics.changes.netProfitMarginChange)) + ' pts' : '0%'}
+                {metrics.changes && comparePeriod !== 'none' && (
+                  <div className="flex items-center gap-2">
+                    <span className={`status-indicator ${metrics.changes?.netProfitMarginChange && metrics.changes.netProfitMarginChange > 0 ? 'trend-up' : 'trend-down'}`}>
+                      {renderTrendIcon(getTrendIcon(metrics.changes?.netProfitMarginChange))}
+                      <span className="text-sm font-medium">
+                        {metrics.changes?.netProfitMarginChange ? (metrics.changes.netProfitMarginChange > 0 ? '+' : '') + formatPercentage(Math.abs(metrics.changes.netProfitMarginChange)) + ' pts' : '0%'}
+                      </span>
                     </span>
-                  </span>
-                  <span className="text-xs text-muted-foreground">vs last period</span>
-                </div>
+                    <span className="text-xs text-muted-foreground">vs last period</span>
+                  </div>
+                )}
               </CardContent>
             </Card>
             
@@ -235,15 +239,17 @@ export default function FinancialMetrics() {
                     <i className="fas fa-money-bill-wave text-chart-2"></i>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className={`status-indicator ${metrics.changes?.operatingCashFlowChange && metrics.changes.operatingCashFlowChange > 0 ? 'trend-up' : 'trend-down'}`}>
-                    {renderTrendIcon(getTrendIcon(metrics.changes?.operatingCashFlowChange))}
-                    <span className="text-sm font-medium">
-                      {formatPercentage(Math.abs(metrics.changes?.operatingCashFlowChange || 0))}
+                {metrics.changes && comparePeriod !== 'none' && (
+                  <div className="flex items-center gap-2">
+                    <span className={`status-indicator ${metrics.changes?.operatingCashFlowChange && metrics.changes.operatingCashFlowChange > 0 ? 'trend-up' : 'trend-down'}`}>
+                      {renderTrendIcon(getTrendIcon(metrics.changes?.operatingCashFlowChange))}
+                      <span className="text-sm font-medium">
+                        {formatPercentage(Math.abs(metrics.changes?.operatingCashFlowChange || 0))}
+                      </span>
                     </span>
-                  </span>
-                  <span className="text-xs text-muted-foreground">vs last period</span>
-                </div>
+                    <span className="text-xs text-muted-foreground">vs last period</span>
+                  </div>
+                )}
               </CardContent>
             </Card>
             
@@ -261,15 +267,17 @@ export default function FinancialMetrics() {
                     <i className="fas fa-percentage text-chart-3"></i>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className={`status-indicator ${metrics.changes?.roeChange && metrics.changes.roeChange > 0 ? 'trend-up' : 'trend-down'}`}>
-                    {renderTrendIcon(getTrendIcon(metrics.changes?.roeChange))}
-                    <span className="text-sm font-medium">
-                      {metrics.changes?.roeChange ? (metrics.changes.roeChange > 0 ? '+' : '') + formatPercentage(Math.abs(metrics.changes.roeChange)) + ' pts' : '0%'}
+                {metrics.changes && comparePeriod !== 'none' && (
+                  <div className="flex items-center gap-2">
+                    <span className={`status-indicator ${metrics.changes?.roeChange && metrics.changes.roeChange > 0 ? 'trend-up' : 'trend-down'}`}>
+                      {renderTrendIcon(getTrendIcon(metrics.changes?.roeChange))}
+                      <span className="text-sm font-medium">
+                        {metrics.changes?.roeChange ? (metrics.changes.roeChange > 0 ? '+' : '') + formatPercentage(Math.abs(metrics.changes.roeChange)) + ' pts' : '0%'}
+                      </span>
                     </span>
-                  </span>
-                  <span className="text-xs text-muted-foreground">vs last period</span>
-                </div>
+                    <span className="text-xs text-muted-foreground">vs last period</span>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
