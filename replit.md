@@ -133,6 +133,17 @@ Preferred communication style: Simple, everyday language.
 - Status thresholds and business rules clearly documented
 - Documented files: financial-metrics.tsx, routes.ts, db-storage.ts, schema.ts, financial-calculations.ts
 
+**Financial Data Input Form** (October 3, 2025): Implemented comprehensive UI for adding/editing financial data:
+- Modal dialog form with 20+ input fields covering all financial metrics
+- Organized into sections: Income Statement, Balance Sheet, Cash Flow, Business Metrics
+- React Hook Form with Zod validation for data integrity
+- Surgical state management using targeted setValue() calls to preserve user input
+- CompanyId and period automatically synchronized with parent component
+- TanStack Query mutations with optimistic updates and cache invalidation
+- Toast notifications for success/error feedback
+- Full test coverage with end-to-end playwright tests
+- Located in `client/src/components/financial-data-form.tsx`
+
 **Development Tools** (Replit-specific):
 - `@replit/vite-plugin-runtime-error-modal` for error overlays
 - `@replit/vite-plugin-cartographer` for code navigation
