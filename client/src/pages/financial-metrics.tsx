@@ -5,6 +5,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Info } from "lucide-react";
 import { useState, useEffect } from "react";
 import { formatCurrency, formatPercentage, formatNumber, getMetricStatus, getTrendIcon } from "@/lib/financial-calculations";
 import MetricChart from "@/components/metric-chart";
@@ -43,6 +45,56 @@ interface FinancialMetrics {
     roeChange: number;
   };
 }
+
+const metricDefinitions: Record<string, string> = {
+  "Total Revenue": "The total income generated from sales of goods or services before any expenses are deducted.",
+  "Net Profit Margin": "The percentage of revenue remaining after all operating expenses, interest, taxes, and preferred stock dividends have been deducted.",
+  "Operating Cash Flow": "Cash generated from normal business operations, indicating the company's ability to generate sufficient positive cash flow to maintain and grow operations.",
+  "Return on Equity": "A measure of financial performance calculated by dividing net income by shareholders' equity, showing how effectively management uses equity financing.",
+  "Gross Profit Margin": "Revenue minus cost of goods sold, divided by revenue, expressed as a percentage. Shows how efficiently a company produces goods.",
+  "Operating Margin": "Operating income divided by revenue, showing the percentage of revenue left after paying for variable costs of production.",
+  "Return on Assets": "Net income divided by total assets, measuring how profitable a company is relative to its total assets.",
+  "Customer Acquisition Cost": "The average cost to acquire a new customer, including all marketing and sales expenses.",
+  "EBITDA Margin": "Earnings before interest, taxes, depreciation and amortization as a percentage of revenue, showing operational profitability.",
+  "Current Ratio": "Current assets divided by current liabilities, measuring a company's ability to pay short-term obligations.",
+  "Quick Ratio": "Liquid assets divided by current liabilities, a more conservative measure of liquidity that excludes inventory.",
+  "Working Capital": "Current assets minus current liabilities, representing the funds available for day-to-day operations.",
+  "Days Sales Outstanding": "The average number of days it takes to collect payment after a sale has been made.",
+  "Cash Conversion Cycle": "The number of days between paying for raw materials and collecting payment from customers.",
+  "Inventory Turnover": "How many times inventory is sold and replaced over a period, indicating efficiency of inventory management.",
+  "AR Turnover": "How many times accounts receivable are collected during a period, indicating efficiency of credit and collection policies.",
+  "AP Turnover": "How quickly a company pays off its suppliers, calculated by dividing cost of goods sold by average accounts payable.",
+  "Asset Turnover": "Revenue divided by total assets, measuring how efficiently a company uses its assets to generate sales.",
+  "Customer Lifetime Value": "The total revenue a business can expect from a single customer account throughout their relationship.",
+  "Debt to Equity": "Total liabilities divided by shareholders' equity, measuring financial leverage and the degree to which a company is financing its operations with debt.",
+  "Debt Ratio": "Total debt divided by total assets, showing what proportion of assets is financed by debt.",
+  "Free Cash Flow": "Operating cash flow minus capital expenditures, representing cash available for distribution to investors.",
+  "Operating CF Ratio": "Operating cash flow divided by current liabilities, measuring ability to pay short-term obligations with cash from operations.",
+  "Revenue Growth": "The percentage increase in revenue compared to the previous period.",
+  "Customer Growth": "The percentage increase in customer count compared to the previous period.",
+  "Profit Growth": "The percentage increase in net profit compared to the previous period."
+};
+
+const MetricTitle = ({ title }: { title: string }) => (
+  <div className="flex items-center gap-1.5">
+    <p className="text-sm text-muted-foreground">{title}</p>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button 
+          type="button"
+          className="inline-flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors" 
+          data-testid={`info-${title.toLowerCase().replace(/\s+/g, '-')}`}
+          aria-label={`Information about ${title}`}
+        >
+          <Info className="h-3.5 w-3.5" />
+        </button>
+      </TooltipTrigger>
+      <TooltipContent className="max-w-xs bg-popover text-popover-foreground border border-border">
+        <p className="text-sm">{metricDefinitions[title] || "No definition available"}</p>
+      </TooltipContent>
+    </Tooltip>
+  </div>
+);
 
 export default function FinancialMetrics() {
   const [selectedPeriod, setSelectedPeriod] = useState("2024");
@@ -123,7 +175,7 @@ export default function FinancialMetrics() {
   }
 
   return (
-    <>
+    <TooltipProvider delayDuration={300} skipDelayDuration={0}>
       {/* Header */}
       <header className="bg-card border-b border-border sticky top-0 z-10">
         <div className="px-6 py-4">
@@ -189,7 +241,7 @@ export default function FinancialMetrics() {
               <CardContent className="p-5">
                 <div className="flex items-start justify-between mb-3">
                   <div>
-                    <p className="text-sm text-muted-foreground">Total Revenue</p>
+                    <MetricTitle title="Total Revenue" />
                     <p className="text-2xl font-bold font-mono text-foreground mt-1" data-testid="text-revenue">
                       {formatCurrency(metrics.revenue)}
                     </p>
@@ -217,7 +269,7 @@ export default function FinancialMetrics() {
               <CardContent className="p-5">
                 <div className="flex items-start justify-between mb-3">
                   <div>
-                    <p className="text-sm text-muted-foreground">Net Profit Margin</p>
+                    <MetricTitle title="Net Profit Margin" />
                     <p className="text-2xl font-bold font-mono text-foreground mt-1" data-testid="text-net-profit-margin">
                       {formatPercentage(metrics.netProfitMargin)}
                     </p>
@@ -245,7 +297,7 @@ export default function FinancialMetrics() {
               <CardContent className="p-5">
                 <div className="flex items-start justify-between mb-3">
                   <div>
-                    <p className="text-sm text-muted-foreground">Operating Cash Flow</p>
+                    <MetricTitle title="Operating Cash Flow" />
                     <p className="text-2xl font-bold font-mono text-foreground mt-1" data-testid="text-operating-cash-flow">
                       {formatCurrency(metrics.operatingCashFlow)}
                     </p>
@@ -273,7 +325,7 @@ export default function FinancialMetrics() {
               <CardContent className="p-5">
                 <div className="flex items-start justify-between mb-3">
                   <div>
-                    <p className="text-sm text-muted-foreground">Return on Equity</p>
+                    <MetricTitle title="Return on Equity" />
                     <p className="text-2xl font-bold font-mono text-foreground mt-1" data-testid="text-roe">
                       {formatPercentage(metrics.roe)}
                     </p>
@@ -389,9 +441,8 @@ export default function FinancialMetrics() {
               <CardContent className="p-5">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <p className="text-sm font-medium text-foreground">Gross Profit Margin</p>
-                      <i className="fas fa-info-circle text-muted-foreground text-xs cursor-help" title="(Revenue - COGS) / Revenue"></i>
+                    <div className="mb-1">
+                      <MetricTitle title="Gross Profit Margin" />
                     </div>
                     <p className="text-3xl font-bold font-mono text-foreground" data-testid="text-gross-profit-margin">
                       {formatPercentage(metrics.grossProfitMargin)}
@@ -412,9 +463,8 @@ export default function FinancialMetrics() {
               <CardContent className="p-5">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <p className="text-sm font-medium text-foreground">Return on Assets</p>
-                      <i className="fas fa-info-circle text-muted-foreground text-xs cursor-help" title="Net Income / Total Assets"></i>
+                    <div className="mb-1">
+                      <MetricTitle title="Return on Assets" />
                     </div>
                     <p className="text-3xl font-bold font-mono text-foreground" data-testid="text-roa">
                       {formatPercentage(metrics.roa)}
@@ -435,9 +485,8 @@ export default function FinancialMetrics() {
               <CardContent className="p-5">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <p className="text-sm font-medium text-foreground">Customer Acquisition Cost</p>
-                      <i className="fas fa-info-circle text-muted-foreground text-xs cursor-help" title="Marketing Spend / New Customers"></i>
+                    <div className="mb-1">
+                      <MetricTitle title="Customer Acquisition Cost" />
                     </div>
                     <p className="text-3xl font-bold font-mono text-foreground" data-testid="text-cac">
                       {formatCurrency(metrics.cac)}
@@ -458,9 +507,8 @@ export default function FinancialMetrics() {
               <CardContent className="p-5">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <p className="text-sm font-medium text-foreground">Operating Margin</p>
-                      <i className="fas fa-info-circle text-muted-foreground text-xs cursor-help" title="Operating Income / Revenue"></i>
+                    <div className="mb-1">
+                      <MetricTitle title="Operating Margin" />
                     </div>
                     <p className="text-3xl font-bold font-mono text-foreground" data-testid="text-operating-margin">
                       {formatPercentage(metrics.operatingMargin)}
@@ -481,9 +529,8 @@ export default function FinancialMetrics() {
               <CardContent className="p-5">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <p className="text-sm font-medium text-foreground">EBITDA Margin</p>
-                      <i className="fas fa-info-circle text-muted-foreground text-xs cursor-help" title="EBITDA / Revenue"></i>
+                    <div className="mb-1">
+                      <MetricTitle title="EBITDA Margin" />
                     </div>
                     <p className="text-3xl font-bold font-mono text-foreground" data-testid="text-ebitda-margin">
                       {formatPercentage(metrics.ebitdaMargin)}
@@ -520,9 +567,8 @@ export default function FinancialMetrics() {
               <CardContent className="p-5">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <p className="text-sm font-medium text-foreground">Current Ratio</p>
-                      <i className="fas fa-info-circle text-muted-foreground text-xs cursor-help" title="Current Assets / Current Liabilities"></i>
+                    <div className="mb-1">
+                      <MetricTitle title="Current Ratio" />
                     </div>
                     <p className="text-3xl font-bold font-mono text-foreground" data-testid="text-current-ratio">
                       {formatNumber(metrics.currentRatio, 2)}
@@ -543,9 +589,8 @@ export default function FinancialMetrics() {
               <CardContent className="p-5">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <p className="text-sm font-medium text-foreground">Quick Ratio</p>
-                      <i className="fas fa-info-circle text-muted-foreground text-xs cursor-help" title="(Current Assets - Inventory) / Current Liabilities"></i>
+                    <div className="mb-1">
+                      <MetricTitle title="Quick Ratio" />
                     </div>
                     <p className="text-3xl font-bold font-mono text-foreground" data-testid="text-quick-ratio">
                       {formatNumber(metrics.quickRatio, 2)}
@@ -566,9 +611,8 @@ export default function FinancialMetrics() {
               <CardContent className="p-5">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <p className="text-sm font-medium text-foreground">Working Capital</p>
-                      <i className="fas fa-info-circle text-muted-foreground text-xs cursor-help" title="Current Assets - Current Liabilities"></i>
+                    <div className="mb-1">
+                      <MetricTitle title="Working Capital" />
                     </div>
                     <p className="text-3xl font-bold font-mono text-foreground" data-testid="text-working-capital">
                       {formatCurrency(metrics.workingCapital, true)}
@@ -589,9 +633,8 @@ export default function FinancialMetrics() {
               <CardContent className="p-5">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <p className="text-sm font-medium text-foreground">Days Sales Outstanding</p>
-                      <i className="fas fa-info-circle text-muted-foreground text-xs cursor-help" title="AR / (Revenue/365)"></i>
+                    <div className="mb-1">
+                      <MetricTitle title="Days Sales Outstanding" />
                     </div>
                     <p className="text-3xl font-bold font-mono text-foreground" data-testid="text-dso">
                       {formatNumber(metrics.dso, 0)} days
@@ -612,9 +655,8 @@ export default function FinancialMetrics() {
               <CardContent className="p-5">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <p className="text-sm font-medium text-foreground">Cash Conversion Cycle</p>
-                      <i className="fas fa-info-circle text-muted-foreground text-xs cursor-help" title="Days Inventory + DSO - Days Payables"></i>
+                    <div className="mb-1">
+                      <MetricTitle title="Cash Conversion Cycle" />
                     </div>
                     <p className="text-3xl font-bold font-mono text-foreground" data-testid="text-ccc">
                       {formatNumber(metrics.ccc, 0)} days
@@ -651,9 +693,8 @@ export default function FinancialMetrics() {
               <CardContent className="p-5">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <p className="text-sm font-medium text-foreground">Inventory Turnover</p>
-                      <i className="fas fa-info-circle text-muted-foreground text-xs cursor-help" title="COGS / Average Inventory"></i>
+                    <div className="mb-1">
+                      <MetricTitle title="Inventory Turnover" />
                     </div>
                     <p className="text-3xl font-bold font-mono text-foreground" data-testid="text-inventory-turnover">
                       {formatNumber(metrics.inventoryTurnover, 1)}x
@@ -674,9 +715,8 @@ export default function FinancialMetrics() {
               <CardContent className="p-5">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <p className="text-sm font-medium text-foreground">A/R Turnover</p>
-                      <i className="fas fa-info-circle text-muted-foreground text-xs cursor-help" title="Revenue / Average Receivables"></i>
+                    <div className="mb-1">
+                      <MetricTitle title="AR Turnover" />
                     </div>
                     <p className="text-3xl font-bold font-mono text-foreground" data-testid="text-ar-turnover">
                       {formatNumber(metrics.arTurnover, 1)}x
@@ -697,9 +737,8 @@ export default function FinancialMetrics() {
               <CardContent className="p-5">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <p className="text-sm font-medium text-foreground">Customer Lifetime Value</p>
-                      <i className="fas fa-info-circle text-muted-foreground text-xs cursor-help" title="Average Revenue per Customer * Lifespan"></i>
+                    <div className="mb-1">
+                      <MetricTitle title="Customer Lifetime Value" />
                     </div>
                     <p className="text-3xl font-bold font-mono text-foreground" data-testid="text-ltv">
                       {formatCurrency(metrics.ltv)}
@@ -720,9 +759,8 @@ export default function FinancialMetrics() {
               <CardContent className="p-5">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <p className="text-sm font-medium text-foreground">A/P Turnover</p>
-                      <i className="fas fa-info-circle text-muted-foreground text-xs cursor-help" title="COGS / Average Payables"></i>
+                    <div className="mb-1">
+                      <MetricTitle title="AP Turnover" />
                     </div>
                     <p className="text-3xl font-bold font-mono text-foreground" data-testid="text-ap-turnover">
                       {formatNumber(metrics.apTurnover, 1)}x
@@ -743,9 +781,8 @@ export default function FinancialMetrics() {
               <CardContent className="p-5">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <p className="text-sm font-medium text-foreground">Asset Turnover</p>
-                      <i className="fas fa-info-circle text-muted-foreground text-xs cursor-help" title="Revenue / Total Assets"></i>
+                    <div className="mb-1">
+                      <MetricTitle title="Asset Turnover" />
                     </div>
                     <p className="text-3xl font-bold font-mono text-foreground" data-testid="text-asset-turnover">
                       {formatNumber(metrics.assetTurnover, 2)}x
@@ -782,9 +819,8 @@ export default function FinancialMetrics() {
               <CardContent className="p-5">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <p className="text-sm font-medium text-foreground">Debt to Equity Ratio</p>
-                      <i className="fas fa-info-circle text-muted-foreground text-xs cursor-help" title="Total Liabilities / Total Equity"></i>
+                    <div className="mb-1">
+                      <MetricTitle title="Debt to Equity" />
                     </div>
                     <p className="text-3xl font-bold font-mono text-foreground" data-testid="text-debt-to-equity">
                       {formatNumber(metrics.debtToEquity, 2)}
@@ -805,9 +841,8 @@ export default function FinancialMetrics() {
               <CardContent className="p-5">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <p className="text-sm font-medium text-foreground">Debt Ratio</p>
-                      <i className="fas fa-info-circle text-muted-foreground text-xs cursor-help" title="Total Liabilities / Total Assets"></i>
+                    <div className="mb-1">
+                      <MetricTitle title="Debt Ratio" />
                     </div>
                     <p className="text-3xl font-bold font-mono text-foreground" data-testid="text-debt-ratio">
                       {formatNumber(metrics.debtRatio, 2)}
@@ -828,9 +863,8 @@ export default function FinancialMetrics() {
               <CardContent className="p-5">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <p className="text-sm font-medium text-foreground">Free Cash Flow</p>
-                      <i className="fas fa-info-circle text-muted-foreground text-xs cursor-help" title="Operating + Investing Cash Flow"></i>
+                    <div className="mb-1">
+                      <MetricTitle title="Free Cash Flow" />
                     </div>
                     <p className="text-3xl font-bold font-mono text-foreground" data-testid="text-free-cash-flow">
                       {formatCurrency(metrics.freeCashFlow, true)}
@@ -851,9 +885,8 @@ export default function FinancialMetrics() {
               <CardContent className="p-5">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <p className="text-sm font-medium text-foreground">OCF Ratio</p>
-                      <i className="fas fa-info-circle text-muted-foreground text-xs cursor-help" title="Operating Cash Flow / Current Liabilities"></i>
+                    <div className="mb-1">
+                      <MetricTitle title="Operating CF Ratio" />
                     </div>
                     <p className="text-3xl font-bold font-mono text-foreground" data-testid="text-operating-cash-flow-ratio">
                       {formatNumber(metrics.operatingCashFlowRatio, 2)}
@@ -890,9 +923,8 @@ export default function FinancialMetrics() {
               <CardContent className="p-5">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <p className="text-sm font-medium text-foreground">Revenue Growth</p>
-                      <i className="fas fa-info-circle text-muted-foreground text-xs cursor-help" title="YoY Revenue Change"></i>
+                    <div className="mb-1">
+                      <MetricTitle title="Revenue Growth" />
                     </div>
                     <p className="text-3xl font-bold font-mono text-foreground" data-testid="text-revenue-growth">
                       {metrics.revenueGrowth > 0 ? '+' : ''}{formatPercentage(metrics.revenueGrowth)}
@@ -914,9 +946,8 @@ export default function FinancialMetrics() {
               <CardContent className="p-5">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <p className="text-sm font-medium text-foreground">Customer Growth</p>
-                      <i className="fas fa-info-circle text-muted-foreground text-xs cursor-help" title="YoY Customer Base Change"></i>
+                    <div className="mb-1">
+                      <MetricTitle title="Customer Growth" />
                     </div>
                     <p className="text-3xl font-bold font-mono text-foreground" data-testid="text-customer-growth">
                       {metrics.customerGrowth > 0 ? '+' : ''}{formatPercentage(metrics.customerGrowth)}
@@ -938,9 +969,8 @@ export default function FinancialMetrics() {
               <CardContent className="p-5">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <p className="text-sm font-medium text-foreground">Profit Growth</p>
-                      <i className="fas fa-info-circle text-muted-foreground text-xs cursor-help" title="YoY Net Income Change"></i>
+                    <div className="mb-1">
+                      <MetricTitle title="Profit Growth" />
                     </div>
                     <p className="text-3xl font-bold font-mono text-foreground" data-testid="text-profit-growth">
                       {metrics.profitGrowth > 0 ? '+' : ''}{formatPercentage(metrics.profitGrowth)}
@@ -1014,6 +1044,6 @@ export default function FinancialMetrics() {
           </Card>
         </section>
       </div>
-    </>
+    </TooltipProvider>
   );
 }
