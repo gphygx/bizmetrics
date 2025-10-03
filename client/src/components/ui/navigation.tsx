@@ -35,7 +35,7 @@ export default function Navigation() {
       <div className="p-6 border-b border-border">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-            <i className="fas fa-chart-line text-primary-foreground text-lg"></i>
+            <i className="fas fa-chart-pie text-primary-foreground text-lg"></i>
           </div>
           <div>
             <h1 className="text-lg font-bold text-foreground">BizMetrics</h1>
