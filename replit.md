@@ -1,8 +1,8 @@
-# VO Ledger - Financial Analytics Platform
+# BizMetrics - Financial Analytics Platform
 
 ## Overview
 
-VO Ledger is a full-stack financial analytics application built to track and visualize company financial metrics. The application provides comprehensive dashboards for analyzing profitability, liquidity, efficiency, leverage, and growth metrics across different time periods. It's designed as a single-page application with a React frontend and Express backend, using PostgreSQL for data persistence.
+BizMetrics is a full-stack financial analytics application built to track and visualize company financial metrics. The application provides comprehensive dashboards for analyzing profitability, liquidity, efficiency, leverage, and growth metrics across different time periods. It's designed as a single-page application with a React frontend and Express backend, using PostgreSQL for data persistence.
 
 ## User Preferences
 

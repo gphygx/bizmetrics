@@ -3,7 +3,7 @@
  * DATABASE SCHEMA
  * ============================================================================
  * 
- * Drizzle ORM schema definitions for the VO Ledger PostgreSQL database.
+ * Drizzle ORM schema definitions for the BizMetrics PostgreSQL database.
  * Defines all tables, relationships, constraints, and validation schemas.
  * 
  * Database Provider: PostgreSQL (Neon Serverless)

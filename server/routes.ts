@@ -3,7 +3,7 @@
  * API ROUTES - Financial Metrics Server
  * ============================================================================
  * 
- * Defines all REST API endpoints for the VO Ledger application.
+ * Defines all REST API endpoints for the BizMetrics application.
  * Handles financial data management, metric calculations, and alert systems.
  * 
  * Route Categories:

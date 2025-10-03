@@ -47,7 +47,7 @@ export default function Navigation() {
             <i className="fas fa-chart-line text-primary-foreground text-lg"></i>
           </div>
           <div>
-            <h1 className="text-lg font-bold text-foreground">VO Ledger</h1>
+            <h1 className="text-lg font-bold text-foreground">BizMetrics</h1>
             <p className="text-xs text-muted-foreground">Financial Analytics</p>
           </div>
         </div>
