@@ -222,26 +222,6 @@ export default function FinancialMetrics() {
     }
   }, [demoData]);
 
-  // Handle scrolling to section based on URL hash
-  useEffect(() => {
-    const hash = window.location.hash.slice(1); // Remove the # character
-    if (hash) {
-      // Small delay to ensure page has rendered
-      setTimeout(() => {
-        const element = document.getElementById(hash);
-        if (element) {
-          const elementPosition = element.getBoundingClientRect().top + window.scrollY;
-          const offsetPosition = elementPosition - 80; // 80px offset for header/spacing
-          
-          window.scrollTo({
-            top: offsetPosition,
-            behavior: 'smooth'
-          });
-        }
-      }, 100);
-    }
-  }, []);
-
   /**
    * Fetch calculated financial metrics for the selected period
    * Includes period-over-period comparison when comparePeriod is set
@@ -275,6 +255,45 @@ export default function FinancialMetrics() {
     },
     enabled: !!companyId && showCharts,  // Lazy load: only when charts are visible
   });
+
+  // Handle hash navigation on page load and when hash changes
+  useEffect(() => {
+    const scrollToHash = () => {
+      const hash = window.location.hash.substring(1); // Remove the # symbol
+      if (hash && metrics) {
+        // Try to scroll to the element multiple times to ensure DOM is fully rendered
+        let attempts = 0;
+        const maxAttempts = 10;
+        
+        const tryScroll = () => {
+          const element = document.getElementById(hash);
+          if (element) {
+            const elementPosition = element.getBoundingClientRect().top + window.scrollY;
+            const offsetPosition = elementPosition - 80; // 80px offset for header/spacing
+            
+            window.scrollTo({
+              top: offsetPosition,
+              behavior: 'smooth'
+            });
+          } else if (attempts < maxAttempts) {
+            // Element not found yet, try again
+            attempts++;
+            setTimeout(tryScroll, 100);
+          }
+        };
+        
+        // Start after a short delay to let React render
+        setTimeout(tryScroll, 200);
+      }
+    };
+
+    // Scroll on mount if hash exists
+    scrollToHash();
+
+    // Listen for hash changes (when user clicks category buttons)
+    window.addEventListener('hashchange', scrollToHash);
+    return () => window.removeEventListener('hashchange', scrollToHash);
+  }, [metrics]); // Re-run when metrics data loads
 
   // ========================================
   // DERIVED STATE
