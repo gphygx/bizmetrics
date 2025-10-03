@@ -13,12 +13,25 @@ export default function Navigation() {
   ];
 
   const metricCategories = [
-    { href: "#profitability", icon: "fas fa-dollar-sign", label: "Profitability" },
-    { href: "#liquidity", icon: "fas fa-water", label: "Liquidity" },
-    { href: "#efficiency", icon: "fas fa-cogs", label: "Efficiency" },
-    { href: "#leverage", icon: "fas fa-balance-scale", label: "Leverage" },
-    { href: "#growth", icon: "fas fa-arrow-trend-up", label: "Growth" }
+    { href: "profitability", icon: "fas fa-dollar-sign", label: "Profitability" },
+    { href: "liquidity", icon: "fas fa-water", label: "Liquidity" },
+    { href: "efficiency", icon: "fas fa-cogs", label: "Efficiency" },
+    { href: "leverage", icon: "fas fa-balance-scale", label: "Leverage" },
+    { href: "growth", icon: "fas fa-arrow-trend-up", label: "Growth" }
   ];
+
+  const handleCategoryClick = (categoryId: string) => {
+    // Navigate to financial metrics page if not already there
+    if (location !== '/financial-metrics') {
+      window.location.href = `/financial-metrics#${categoryId}`;
+    } else {
+      // Already on the page, just scroll to section
+      const element = document.getElementById(categoryId);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+  };
 
   return (
     <aside className="w-64 bg-card border-r border-border flex-shrink-0 hidden lg:flex flex-col">
@@ -59,15 +72,15 @@ export default function Navigation() {
           </h3>
           <div className="space-y-1">
             {metricCategories.map((category) => (
-              <a 
+              <button
                 key={category.href}
-                href={category.href} 
-                className="flex items-center gap-3 px-3 py-2 rounded-md text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                onClick={() => handleCategoryClick(category.href)}
+                className="flex items-center gap-3 px-3 py-2 rounded-md text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors w-full text-left"
                 data-testid={`category-${category.label.toLowerCase()}`}
               >
                 <i className={`${category.icon} w-4 text-xs`}></i>
                 <span>{category.label}</span>
-              </a>
+              </button>
             ))}
           </div>
         </div>

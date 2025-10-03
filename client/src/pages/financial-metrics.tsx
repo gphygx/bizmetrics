@@ -220,6 +220,20 @@ export default function FinancialMetrics() {
     }
   }, [demoData]);
 
+  // Handle scrolling to section based on URL hash
+  useEffect(() => {
+    const hash = window.location.hash.slice(1); // Remove the # character
+    if (hash) {
+      // Small delay to ensure page has rendered
+      setTimeout(() => {
+        const element = document.getElementById(hash);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100);
+    }
+  }, []);
+
   /**
    * Fetch calculated financial metrics for the selected period
    * Includes period-over-period comparison when comparePeriod is set
