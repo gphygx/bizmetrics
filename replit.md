@@ -118,6 +118,21 @@ Preferred communication style: Simple, everyday language.
 - CRUD API endpoints for managing alerts
 - Frontend UI integration pending (scheduled as next development phase)
 
+**Info Icon Tooltips**: Enhanced user experience with metric definitions:
+- 27 info icons added to all metric tiles
+- Hover tooltips with detailed metric definitions and formulas
+- Radix UI tooltip component with 300ms delay for responsive UX
+- Centralized metricDefinitions object for maintainable content
+
+**Comprehensive Code Documentation** (October 3, 2025): Added extensive inline documentation for maintainability:
+- JSDoc comments with parameter/return type documentation for all major functions
+- File headers explaining purpose, contents, and architecture
+- Section separators organizing code into logical blocks
+- Inline annotations explaining complex logic and calculations
+- Formula documentation with examples for all financial metrics
+- Status thresholds and business rules clearly documented
+- Documented files: financial-metrics.tsx, routes.ts, db-storage.ts, schema.ts, financial-calculations.ts
+
 **Development Tools** (Replit-specific):
 - `@replit/vite-plugin-runtime-error-modal` for error overlays
 - `@replit/vite-plugin-cartographer` for code navigation
