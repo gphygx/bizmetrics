@@ -40,6 +40,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 // Utility functions and custom components
 import { formatCurrency, formatPercentage, formatNumber, getMetricStatus, getTrendIcon } from "@/lib/financial-calculations";
 import MetricChart from "@/components/metric-chart";
+import FinancialDataForm from "@/components/financial-data-form";
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -202,6 +203,7 @@ export default function FinancialMetrics() {
   const [comparePeriod, setComparePeriod] = useState("2023");    // Period for comparison
   const [companyId, setCompanyId] = useState("");                // Active company ID
   const [showCharts, setShowCharts] = useState(false);           // Charts section visibility
+  const [showDataForm, setShowDataForm] = useState(false);       // Financial data form visibility
   
   // ========================================
   // DATA FETCHING
@@ -369,6 +371,16 @@ export default function FinancialMetrics() {
                   </SelectContent>
                 </Select>
               </div>
+              
+              {/* Add Data Button */}
+              <Button 
+                onClick={() => setShowDataForm(true)} 
+                variant="outline"
+                data-testid="button-add-data"
+              >
+                <i className="fas fa-plus mr-2"></i>
+                Add Data
+              </Button>
               
               {/* Export Button */}
               <Button data-testid="button-export">
@@ -1194,6 +1206,14 @@ export default function FinancialMetrics() {
           </Card>
         </section>
       </div>
+
+      {/* Financial Data Input Form */}
+      <FinancialDataForm 
+        open={showDataForm} 
+        onOpenChange={setShowDataForm}
+        companyId={companyId}
+        defaultPeriod={selectedPeriod}
+      />
     </TooltipProvider>
   );
 }
