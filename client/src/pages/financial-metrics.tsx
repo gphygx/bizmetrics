@@ -4,8 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useState, useEffect } from "react";
 import { formatCurrency, formatPercentage, formatNumber, getMetricStatus, getTrendIcon } from "@/lib/financial-calculations";
+import MetricChart from "@/components/metric-chart";
 
 interface FinancialMetrics {
   revenue: number;
@@ -46,6 +48,7 @@ export default function FinancialMetrics() {
   const [selectedPeriod, setSelectedPeriod] = useState("2024");
   const [comparePeriod, setComparePeriod] = useState("2023");
   const [companyId, setCompanyId] = useState("");
+  const [showCharts, setShowCharts] = useState(false);
 
   // Get demo user and company data
   const { data: demoData, isLoading: demoLoading } = useQuery<any>({
@@ -69,6 +72,18 @@ export default function FinancialMetrics() {
       return res.json();
     },
     enabled: !!companyId,
+  });
+
+  // Get historical data for charts
+  const { data: historyData, isLoading: historyLoading } = useQuery<any[]>({
+    queryKey: ["/api/metrics", companyId, "history"],
+    queryFn: async () => {
+      const url = `/api/metrics/${companyId}/history`;
+      const res = await fetch(url, { credentials: "include" });
+      if (!res.ok) throw new Error('Failed to fetch history');
+      return res.json();
+    },
+    enabled: !!companyId && showCharts,
   });
 
   const isLoading = demoLoading || metricsLoading;
@@ -282,6 +297,78 @@ export default function FinancialMetrics() {
             </Card>
           </div>
         </section>
+
+        {/* Historical Trends Section */}
+        <Collapsible open={showCharts} onOpenChange={setShowCharts}>
+          <CollapsibleTrigger asChild>
+            <Button 
+              variant="outline" 
+              className="w-full justify-between mb-6"
+              data-testid="button-toggle-charts"
+            >
+              <span className="flex items-center gap-2">
+                <i className="fas fa-chart-line"></i>
+                <span>Historical Trends & Charts</span>
+              </span>
+              <i className={`fas fa-chevron-${showCharts ? 'up' : 'down'}`}></i>
+            </Button>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="mb-8">
+            {historyLoading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {[1, 2, 3, 4].map((i) => (
+                  <Skeleton key={i} className="h-[280px]" />
+                ))}
+              </div>
+            ) : historyData && historyData.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <MetricChart 
+                  title="Revenue Trend"
+                  data={historyData.map(d => ({ period: d.period, value: d.revenue }))}
+                  formatValue={formatCurrency}
+                  color="hsl(var(--primary))"
+                />
+                <MetricChart 
+                  title="Net Profit Margin"
+                  data={historyData.map(d => ({ period: d.period, value: d.netProfitMargin }))}
+                  formatValue={formatPercentage}
+                  color="hsl(var(--chart-1))"
+                />
+                <MetricChart 
+                  title="Operating Cash Flow"
+                  data={historyData.map(d => ({ period: d.period, value: d.operatingCashFlow }))}
+                  formatValue={formatCurrency}
+                  color="hsl(var(--chart-2))"
+                />
+                <MetricChart 
+                  title="Return on Equity"
+                  data={historyData.map(d => ({ period: d.period, value: d.roe }))}
+                  formatValue={formatPercentage}
+                  color="hsl(var(--chart-3))"
+                />
+                <MetricChart 
+                  title="Current Ratio"
+                  data={historyData.map(d => ({ period: d.period, value: d.currentRatio }))}
+                  formatValue={(v) => v.toFixed(2)}
+                  color="hsl(var(--chart-4))"
+                />
+                <MetricChart 
+                  title="Debt-to-Equity Ratio"
+                  data={historyData.map(d => ({ period: d.period, value: d.debtToEquity }))}
+                  formatValue={(v) => v.toFixed(2)}
+                  color="hsl(var(--chart-5))"
+                />
+              </div>
+            ) : (
+              <Card>
+                <CardContent className="p-8 text-center">
+                  <i className="fas fa-chart-line text-4xl text-muted-foreground mb-3"></i>
+                  <p className="text-muted-foreground">No historical data available</p>
+                </CardContent>
+              </Card>
+            )}
+          </CollapsibleContent>
+        </Collapsible>
 
         {/* Profitability Metrics */}
         <section id="profitability">

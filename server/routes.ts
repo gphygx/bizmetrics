@@ -102,6 +102,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get historical metrics for charts
+  app.get("/api/metrics/:companyId/history", async (req, res) => {
+    try {
+      const { companyId } = req.params;
+      const allData = await storage.getFinancialData(companyId);
+      
+      const historicalMetrics = allData.map(data => {
+        const metrics = calculateFinancialMetrics(data);
+        return {
+          period: data.period,
+          periodType: data.periodType,
+          revenue: metrics.revenue,
+          netProfitMargin: metrics.netProfitMargin,
+          operatingCashFlow: metrics.operatingCashFlow,
+          grossProfitMargin: metrics.grossProfitMargin,
+          currentRatio: metrics.currentRatio,
+          roe: metrics.roe,
+          roa: metrics.roa,
+          debtToEquity: metrics.debtToEquity,
+        };
+      }).sort((a, b) => {
+        if (a.period < b.period) return -1;
+        if (a.period > b.period) return 1;
+        return 0;
+      });
+      
+      res.json(historicalMetrics);
+    } catch (error) {
+      console.error("Error fetching historical metrics:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
