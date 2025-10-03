@@ -1,4 +1,34 @@
+/**
+ * ============================================================================
+ * FINANCIAL METRICS DASHBOARD
+ * ============================================================================
+ * 
+ * Comprehensive financial metrics tracking and visualization dashboard.
+ * Displays 27+ key financial metrics across 5 categories:
+ * - Profitability (margins, ROA, CAC, EBITDA)
+ * - Liquidity (ratios, working capital, DSO, CCC)
+ * - Efficiency (turnover ratios, LTV)
+ * - Leverage (debt ratios, free cash flow)
+ * - Growth (revenue, customer, profit growth)
+ * 
+ * Features:
+ * - Period-over-period comparison with visual indicators
+ * - Interactive historical trend charts using Recharts
+ * - Info tooltips with metric definitions
+ * - Real-time health status badges
+ * - Export functionality (UI only, backend pending)
+ */
+
+// ============================================================================
+// IMPORTS
+// ============================================================================
+
+// Third-party libraries
 import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
+import { Info } from "lucide-react";
+
+// UI Components
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -6,11 +36,23 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Info } from "lucide-react";
-import { useState, useEffect } from "react";
+
+// Utility functions and custom components
 import { formatCurrency, formatPercentage, formatNumber, getMetricStatus, getTrendIcon } from "@/lib/financial-calculations";
 import MetricChart from "@/components/metric-chart";
 
+// ============================================================================
+// TYPE DEFINITIONS
+// ============================================================================
+
+/**
+ * Financial Metrics Interface
+ * 
+ * Defines the structure for all financial metrics returned from the API.
+ * Contains 27 key financial indicators across multiple categories.
+ * 
+ * @interface FinancialMetrics
+ */
 interface FinancialMetrics {
   revenue: number;
   netProfitMargin: number;
@@ -38,14 +80,27 @@ interface FinancialMetrics {
   revenueGrowth: number;
   customerGrowth: number;
   profitGrowth: number;
+  // Period-over-period changes (optional, only included when comparison is enabled)
   changes?: {
-    revenueChange: number;
-    netProfitMarginChange: number;
-    operatingCashFlowChange: number;
-    roeChange: number;
+    revenueChange: number;              // % change in revenue
+    netProfitMarginChange: number;      // Percentage point change in net profit margin
+    operatingCashFlowChange: number;    // % change in operating cash flow
+    roeChange: number;                  // Percentage point change in ROE
   };
 }
 
+// ============================================================================
+// METRIC DEFINITIONS
+// ============================================================================
+
+/**
+ * Metric Definitions Dictionary
+ * 
+ * Contains human-readable definitions for all 27 financial metrics.
+ * These definitions are displayed in tooltips when users hover over info icons.
+ * 
+ * Each definition explains what the metric measures and how it's calculated.
+ */
 const metricDefinitions: Record<string, string> = {
   "Total Revenue": "The total income generated from sales of goods or services before any expenses are deducted.",
   "Net Profit Margin": "The percentage of revenue remaining after all operating expenses, interest, taxes, and preferred stock dividends have been deducted.",
@@ -75,6 +130,24 @@ const metricDefinitions: Record<string, string> = {
   "Profit Growth": "The percentage increase in net profit compared to the previous period."
 };
 
+// ============================================================================
+// HELPER COMPONENTS
+// ============================================================================
+
+/**
+ * Metric Title Component
+ * 
+ * Renders a metric title with an info icon tooltip.
+ * When users hover over the info icon, a tooltip appears with the metric's definition.
+ * 
+ * @component
+ * @param {Object} props - Component props
+ * @param {string} props.title - The metric title (e.g., "Total Revenue", "Current Ratio")
+ * @returns {JSX.Element} A flex container with the title text and info icon button
+ * 
+ * @example
+ * <MetricTitle title="Total Revenue" />
+ */
 const MetricTitle = ({ title }: { title: string }) => (
   <div className="flex items-center gap-1.5">
     <p className="text-sm text-muted-foreground">{title}</p>
@@ -96,25 +169,61 @@ const MetricTitle = ({ title }: { title: string }) => (
   </div>
 );
 
+// ============================================================================
+// MAIN COMPONENT
+// ============================================================================
+
+/**
+ * Financial Metrics Dashboard Component
+ * 
+ * Main page component that displays comprehensive financial metrics and analytics.
+ * 
+ * State Management:
+ * - selectedPeriod: Currently selected time period for metrics (e.g., "2024", "2024-Q4")
+ * - comparePeriod: Period to compare against (e.g., "2023" for previous year)
+ * - companyId: ID of the company whose metrics are being displayed
+ * - showCharts: Boolean to toggle historical trends section visibility
+ * 
+ * Data Fetching:
+ * - Fetches demo user/company data on mount
+ * - Fetches calculated metrics for selected period with comparison
+ * - Lazy-loads historical data only when charts section is expanded
+ * 
+ * @component
+ * @returns {JSX.Element} The complete Financial Metrics Dashboard
+ */
 export default function FinancialMetrics() {
-  const [selectedPeriod, setSelectedPeriod] = useState("2024");
-  const [comparePeriod, setComparePeriod] = useState("2023");
-  const [companyId, setCompanyId] = useState("");
-  const [showCharts, setShowCharts] = useState(false);
+  
+  // ========================================
+  // STATE MANAGEMENT
+  // ========================================
+  
+  const [selectedPeriod, setSelectedPeriod] = useState("2024");  // Current period to display
+  const [comparePeriod, setComparePeriod] = useState("2023");    // Period for comparison
+  const [companyId, setCompanyId] = useState("");                // Active company ID
+  const [showCharts, setShowCharts] = useState(false);           // Charts section visibility
+  
+  // ========================================
+  // DATA FETCHING
+  // ========================================
 
   // Get demo user and company data
   const { data: demoData, isLoading: demoLoading } = useQuery<any>({
     queryKey: ["/api/demo-user"],
   });
 
-  // Set company ID when demo data loads
+  // Automatically set company ID when demo data loads
   useEffect(() => {
     if (demoData?.companies && demoData.companies.length > 0) {
+      // Use the first company from the demo user
       setCompanyId(demoData.companies[0].id);
     }
   }, [demoData]);
 
-  // Get financial metrics
+  /**
+   * Fetch calculated financial metrics for the selected period
+   * Includes period-over-period comparison when comparePeriod is set
+   */
   const { data: metrics, isLoading: metricsLoading } = useQuery<FinancialMetrics>({
     queryKey: ["/api/metrics", companyId, selectedPeriod, comparePeriod],
     queryFn: async () => {
@@ -123,10 +232,17 @@ export default function FinancialMetrics() {
       if (!res.ok) throw new Error('Failed to fetch metrics');
       return res.json();
     },
-    enabled: !!companyId,
+    enabled: !!companyId,  // Only fetch when company ID is available
   });
 
-  // Get historical data for charts
+  /**
+   * Fetch historical data for trend charts
+   * This query is only enabled when:
+   * 1. Company ID is available
+   * 2. Charts section is expanded (showCharts = true)
+   * 
+   * This lazy-loading approach improves initial page load performance
+   */
   const { data: historyData, isLoading: historyLoading } = useQuery<any[]>({
     queryKey: ["/api/metrics", companyId, "history"],
     queryFn: async () => {
@@ -135,11 +251,25 @@ export default function FinancialMetrics() {
       if (!res.ok) throw new Error('Failed to fetch history');
       return res.json();
     },
-    enabled: !!companyId && showCharts,
+    enabled: !!companyId && showCharts,  // Lazy load: only when charts are visible
   });
 
+  // ========================================
+  // DERIVED STATE
+  // ========================================
+  
   const isLoading = demoLoading || metricsLoading;
 
+  // ========================================
+  // HELPER FUNCTIONS
+  // ========================================
+  
+  /**
+   * Renders a trend indicator icon based on direction
+   * 
+   * @param {('up'|'down'|'neutral')} trend - The direction of the trend
+   * @returns {JSX.Element} FontAwesome icon element
+   */
   const renderTrendIcon = (trend: 'up' | 'down' | 'neutral') => {
     if (trend === 'up') return <i className="fas fa-arrow-up text-xs"></i>;
     if (trend === 'down') return <i className="fas fa-arrow-down text-xs"></i>;
