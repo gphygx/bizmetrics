@@ -4,12 +4,12 @@ export default function Navigation() {
   const [location] = useLocation();
 
   const navItems = [
-    { href: "#", icon: "fas fa-tachometer-alt", label: "Dashboard" },
-    { href: "#", icon: "fas fa-receipt", label: "Transactions" },
-    { href: "#", icon: "fas fa-file-invoice-dollar", label: "Invoices" },
+    { href: "/dashboard", icon: "fas fa-tachometer-alt", label: "Dashboard" },
+    { href: "/transactions", icon: "fas fa-receipt", label: "Transactions" },
+    { href: "/invoices", icon: "fas fa-file-invoice-dollar", label: "Invoices" },
     { href: "/financial-metrics", icon: "fas fa-chart-bar", label: "Financial Metrics" },
-    { href: "#", icon: "fas fa-file-alt", label: "Reports" },
-    { href: "#", icon: "fas fa-users", label: "Contacts" }
+    { href: "/reports", icon: "fas fa-file-alt", label: "Reports" },
+    { href: "/contacts", icon: "fas fa-users", label: "Contacts" }
   ];
 
   const metricCategories = [

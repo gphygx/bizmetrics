@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, decimal, timestamp, integer } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, decimal, timestamp, integer, unique } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -52,7 +52,9 @@ export const financialData = pgTable("financial_data", {
   
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-});
+}, (table) => ({
+  uniqueCompanyPeriod: unique().on(table.companyId, table.period),
+}));
 
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
