@@ -25,10 +25,16 @@ export default function Navigation() {
     if (location !== '/financial-metrics') {
       window.location.href = `/financial-metrics#${categoryId}`;
     } else {
-      // Already on the page, just scroll to section
+      // Already on the page, just scroll to section with offset
       const element = document.getElementById(categoryId);
       if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        const elementPosition = element.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.pageYOffset - 80; // 80px offset for header/spacing
+        
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: 'smooth'
+        });
       }
     }
   };
