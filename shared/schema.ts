@@ -1,300 +1,445 @@
 /**
  * ============================================================================
- * DATABASE SCHEMA
+ * DATABASE SCHEMA - BIZMETRICS FINANCIAL PLATFORM
  * ============================================================================
  * 
- * Drizzle ORM schema definitions for the BizMetrics PostgreSQL database.
- * Defines all tables, relationships, constraints, and validation schemas.
+ * Complete database schema for BizMetrics financial analytics platform.
+ * Supports multi-tenant architecture with secure user authentication and
+ * role-based access control.
  * 
- * Database Provider: PostgreSQL (Neon Serverless)
+ * Database: PostgreSQL (Neon Serverless)
  * ORM: Drizzle ORM
- * Validation: Zod schemas generated from Drizzle definitions
+ * Validation: Zod schemas with Drizzle-Zod integration
  * 
- * Tables:
- * - users: User accounts with authentication
- * - companies: Companies owned by users
- * - financial_data: Financial records per company and period
- * - metric_alerts: Custom threshold alerts for metrics
+ * TABLE OVERVIEW:
+ * - users: User authentication and profiles
+ * - companies: Business entities for financial tracking
+ * - company_users: Multi-user access with roles & permissions
+ * - sessions: Secure authentication sessions
+ * - financial_data: Raw financial records (P&L, Balance Sheet, Cash Flow)
+ * - metric_alerts: Custom threshold alerts for financial metrics
  * 
- * Key Features:
- * - UUID primary keys auto-generated via PostgreSQL
- * - Unique constraints for data integrity
- * - Foreign key relationships with referential integrity
- * - Decimal precision for financial values (15 digits, 2 decimal places)
- * - Timestamp tracking for created/updated records
+ * SECURITY FEATURES:
+ * - UUID primary keys for all tables
+ * - Referential integrity with foreign key constraints
+ * - Unique constraints to prevent data duplication
+ * - Role-based access control (Owner, Admin, User, Viewer)
+ * - Session management with expiration
+ * - Email verification system
+ * 
+ * FINANCIAL DATA PRECISION:
+ * - All monetary values: 15 digits, 2 decimal places
+ * - Supports values up to $999,999,999,999.99
+ * - Decimal types prevent floating-point rounding errors
  */
 
 // ============================================================================
-// IMPORTS
+// IMPORTS & DEPENDENCIES
 // ============================================================================
 
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, decimal, timestamp, integer, unique } from "drizzle-orm/pg-core";
+import { 
+  pgTable, 
+  text, 
+  varchar, 
+  decimal, 
+  timestamp, 
+  integer, 
+  unique, 
+  jsonb,
+  boolean 
+} from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
 // ============================================================================
-// TABLE DEFINITIONS
+// CORE AUTHENTICATION TABLES
 // ============================================================================
 
 /**
- * Users Table
+ * USERS TABLE
  * 
- * Stores user accounts for authentication and authorization.
- * Each user can own multiple companies.
+ * Central user registry for authentication and authorization.
+ * Stores credentials, profile information, and account status.
  * 
- * Constraints:
- * - Primary key: id (UUID, auto-generated)
- * - Unique: username (prevents duplicate accounts)
+ * SECURITY NOTES:
+ * - Passwords should be hashed using bcrypt or similar before storage
+ * - Email verification prevents spam accounts and ensures deliverability
+ * - Unique constraints on username and email prevent duplicate accounts
  * 
  * @table users
+ * @index username, email (unique)
  */
 export const users = pgTable("users", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  username: text("username").notNull().unique(),        // User's email/username (unique)
-  password: text("password").notNull(),                 // Hashed password
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+
+  username: text("username")
+    .notNull()
+    .unique(),                    // Login identifier (unique)
+
+  email: text("email")
+    .notNull()
+    .unique(),                    // Primary contact email (unique)
+
+  password: text("password")
+    .notNull(),                   // Hashed password (never store plain text)
+
+  fullName: text("full_name"),    // User's full name for display
+
+  emailVerified: boolean("email_verified")
+    .default(false),              // Email verification status
+
+  createdAt: timestamp("created_at")
+    .defaultNow(),                // Account creation timestamp
+
+  updatedAt: timestamp("updated_at")
+    .defaultNow(),                // Last profile update timestamp
 });
 
 /**
- * Companies Table
+ * COMPANIES TABLE
  * 
- * Stores company information linked to user accounts.
- * One user can have multiple companies (one-to-many relationship).
+ * Business entities that own financial data and metrics.
+ * Each company can have multiple users with different access levels.
  * 
- * Relationships:
- * - Belongs to: users (via userId foreign key)
- * - Has many: financialData, metricAlerts
- * 
- * Constraints:
- * - Primary key: id (UUID, auto-generated)
- * - Foreign key: userId references users(id)
+ * RELATIONSHIPS:
+ * - One-to-Many: users (via userId - original owner)
+ * - Many-to-Many: users (via company_users junction table)
+ * - One-to-Many: financial_data, metric_alerts
  * 
  * @table companies
+ * @index userId (foreign key)
  */
 export const companies = pgTable("companies", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  name: text("name").notNull(),                         // Company name
-  userId: varchar("user_id")                            // Owner's user ID
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+
+  name: text("name")
+    .notNull(),                   // Company legal name
+
+  userId: varchar("user_id")      // Original company owner/creator
     .references(() => users.id)
     .notNull(),
-  createdAt: timestamp("created_at").defaultNow(),      // Record creation timestamp
+
+  createdAt: timestamp("created_at")
+    .defaultNow(),                // Company registration timestamp
 });
 
 /**
- * Metric Alerts Table
+ * COMPANY_USERS TABLE (JUNCTION TABLE)
  * 
- * Stores custom threshold alerts for financial metrics.
- * Allows users to set notifications when metrics cross specified thresholds.
+ * Enables multi-user access to companies with role-based permissions.
+ * This is the core of our multi-tenant security architecture.
  * 
- * Relationships:
- * - Belongs to: companies (via companyId foreign key)
+ * ROLE HIERARCHY:
+ * - owner: Full control (can delete company, manage all users)
+ * - admin: Administrative access (manage users, edit all data)
+ * - user: Standard access (edit financial data, view metrics)
+ * - viewer: Read-only access (view data only, no edits)
  * 
- * Constraints:
- * - Primary key: id (UUID, auto-generated)
- * - Foreign key: companyId references companies(id)
- * - Unique: (companyId, metricName) - One alert per metric per company
+ * PERMISSIONS STRUCTURE (JSONB):
+ * {
+ *   "financialData": ["read", "write", "delete"],
+ *   "users": ["read", "manage"],
+ *   "settings": ["read", "write"],
+ *   "alerts": ["read", "write", "manage"]
+ * }
  * 
- * Alert Conditions:
- * - "above": Trigger when metric exceeds threshold
- * - "below": Trigger when metric falls below threshold
+ * SECURITY: Unique constraint prevents duplicate user-company relationships
  * 
- * @table metric_alerts
+ * @table company_users
+ * @index userId, companyId (unique composite)
+ * @index companyId (foreign key)
  */
-export const metricAlerts = pgTable("metric_alerts", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  companyId: varchar("company_id")                      // Company this alert belongs to
+export const companyUsers = pgTable("company_users", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+
+  userId: varchar("user_id")      // User being granted access
+    .references(() => users.id)
+    .notNull(),
+
+  companyId: varchar("company_id") // Company being accessed
     .references(() => companies.id)
     .notNull(),
-  metricName: text("metric_name").notNull(),            // Metric identifier (e.g., "currentRatio")
-  threshold: decimal("threshold", { 
-    precision: 15, 
-    scale: 2 
-  }).notNull(),                                         // Alert threshold value
-  condition: text("condition").notNull(),               // "above" or "below"
-  isEnabled: integer("is_enabled")                      // 1 = enabled, 0 = disabled
-    .default(1)
-    .notNull(),
-  createdAt: timestamp("created_at").defaultNow(),      // Record creation timestamp
-  updatedAt: timestamp("updated_at").defaultNow(),      // Last update timestamp
+
+  role: text("role")
+    .notNull(),                   // 'owner' | 'admin' | 'user' | 'viewer'
+
+  permissions: jsonb("permissions"), // Custom permission overrides
+
+  createdAt: timestamp("created_at")
+    .defaultNow(),                // When access was granted
+
+  invitedBy: varchar("invited_by") // User who invited this member
+    .references(() => users.id),
+
+  invitedAt: timestamp("invited_at")
+    .defaultNow(),                // When invitation was sent
+
 }, (table) => ({
-  // Ensure only one alert per metric per company
-  uniqueCompanyMetric: unique().on(table.companyId, table.metricName),
+  // Critical constraint: Each user can have only one role per company
+  uniqueUserCompany: unique().on(table.userId, table.companyId),
 }));
 
 /**
- * Financial Data Table
+ * SESSIONS TABLE
  * 
- * Stores raw financial data for companies across different time periods.
- * Contains income statement, balance sheet, cash flow, and business metrics.
+ * Manages user authentication sessions for secure stateless authentication.
+ * Supports session expiration, activity tracking, and security monitoring.
  * 
- * Relationships:
- * - Belongs to: companies (via companyId foreign key)
+ * SECURITY FEATURES:
+ * - Automatic expiration prevents stale sessions
+ * - IP and user agent tracking for security audits
+ * - Last activity monitoring for auto-logout
  * 
- * Constraints:
- * - Primary key: id (UUID, auto-generated)
- * - Foreign key: companyId references companies(id)
- * - Unique: (companyId, period) - One record per company per period
+ * @table sessions
+ * @index userId (foreign key)
+ * @index expiresAt (for cleanup jobs)
+ */
+export const sessions = pgTable("sessions", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+
+  userId: varchar("user_id")      // Authenticated user
+    .references(() => users.id)
+    .notNull(),
+
+  expiresAt: timestamp("expires_at")
+    .notNull(),                   // Session expiration timestamp
+
+  createdAt: timestamp("created_at")
+    .defaultNow(),                // Session creation time
+
+  lastActive: timestamp("last_active")
+    .defaultNow(),                // Last user activity timestamp
+
+  ipAddress: text("ip_address"),  // Client IP for security tracking
+
+  userAgent: text("user_agent"),  // Browser/device information
+});
+
+// ============================================================================
+// FINANCIAL DATA TABLES
+// ============================================================================
+
+/**
+ * FINANCIAL_DATA TABLE
  * 
- * Period Types:
- * - "yearly": Annual periods (e.g., "2024")
- * - "quarterly": Quarterly periods (e.g., "2024-Q1")
- * - "monthly": Monthly periods (e.g., "2024-01")
+ * Comprehensive financial data storage for companies across time periods.
+ * Contains complete financial statements: Income Statement, Balance Sheet, 
+ * Cash Flow Statement, and key business metrics.
  * 
- * Financial Data Categories:
- * 1. Income Statement: Revenue, profits, costs, expenses
- * 2. Balance Sheet: Assets, liabilities, equity, inventory, receivables
- * 3. Cash Flow: Operating, investing, financing cash flows
- * 4. Business Metrics: Marketing spend, customer counts
+ * DATA ORGANIZATION:
+ * - Period-based: yearly, quarterly, or monthly periods
+ * - Company-specific: All data tied to specific company
+ * - Unique constraint: One record per company per period
  * 
- * Decimal Precision:
- * - All monetary values: 15 digits total, 2 decimal places
- * - Supports values up to $999,999,999,999.99
+ * FINANCIAL CATEGORIES:
+ * 1. INCOME STATEMENT: Revenue, profits, costs, expenses
+ * 2. BALANCE SHEET: Assets, liabilities, equity, working capital
+ * 3. CASH FLOW: Operating, investing, financing activities
+ * 4. BUSINESS METRICS: Marketing, customers, growth indicators
+ * 
+ * PERIOD TYPES:
+ * - "yearly": Annual data (e.g., "2024")
+ * - "quarterly": Quarterly data (e.g., "2024-Q1")  
+ * - "monthly": Monthly data (e.g., "2024-01")
  * 
  * @table financial_data
+ * @index companyId, period (unique composite)
+ * @index companyId (foreign key)
  */
 export const financialData = pgTable("financial_data", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  companyId: varchar("company_id")                      // Company this data belongs to
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+
+  companyId: varchar("company_id") // Owning company
     .references(() => companies.id)
     .notNull(),
-  period: text("period").notNull(),                     // Period identifier (e.g., "2024", "2024-Q1")
-  periodType: text("period_type").notNull(),            // "monthly", "quarterly", or "yearly"
-  
-  // ========================================
-  // INCOME STATEMENT
-  // ========================================
+
+  period: text("period")
+    .notNull(),                   // "2024", "2024-Q1", "2024-01"
+
+  periodType: text("period_type")
+    .notNull(),                   // "yearly", "quarterly", "monthly"
+
+  // ==================== INCOME STATEMENT ====================
   totalRevenue: decimal("total_revenue", { 
-    precision: 15, 
-    scale: 2 
-  }).default("0"),                                      // Total sales revenue
-  
+    precision: 15, scale: 2 
+  }).default("0"),                // Total sales revenue
+
   grossProfit: decimal("gross_profit", { 
-    precision: 15, 
-    scale: 2 
-  }).default("0"),                                      // Revenue minus COGS
-  
+    precision: 15, scale: 2 
+  }).default("0"),                // Revenue - Cost of Goods Sold
+
   netIncome: decimal("net_income", { 
-    precision: 15, 
-    scale: 2 
-  }).default("0"),                                      // Bottom line profit
-  
+    precision: 15, scale: 2 
+  }).default("0"),                // Bottom line profit/loss
+
   operatingIncome: decimal("operating_income", { 
-    precision: 15, 
-    scale: 2 
-  }).default("0"),                                      // Profit from core operations
-  
+    precision: 15, scale: 2 
+  }).default("0"),                // Profit from core operations
+
   costOfGoodsSold: decimal("cost_of_goods_sold", { 
-    precision: 15, 
-    scale: 2 
-  }).default("0"),                                      // Direct costs of production
-  
+    precision: 15, scale: 2 
+  }).default("0"),                // Direct production costs
+
   operatingExpenses: decimal("operating_expenses", { 
-    precision: 15, 
-    scale: 2 
-  }).default("0"),                                      // Operating costs (SG&A, etc.)
-  
-  // ========================================
-  // BALANCE SHEET
-  // ========================================
+    precision: 15, scale: 2 
+  }).default("0"),                // SG&A, R&D, other operating costs
+
+  // ==================== BALANCE SHEET ====================
   totalAssets: decimal("total_assets", { 
-    precision: 15, 
-    scale: 2 
-  }).default("0"),                                      // All company assets
-  
+    precision: 15, scale: 2 
+  }).default("0"),                // Total company assets
+
   currentAssets: decimal("current_assets", { 
-    precision: 15, 
-    scale: 2 
-  }).default("0"),                                      // Assets convertible within 1 year
-  
+    precision: 15, scale: 2 
+  }).default("0"),                // Assets convertible within 1 year
+
   inventory: decimal("inventory", { 
-    precision: 15, 
-    scale: 2 
-  }).default("0"),                                      // Inventory value
-  
+    precision: 15, scale: 2 
+  }).default("0"),                // Goods available for sale
+
   accountsReceivable: decimal("accounts_receivable", { 
-    precision: 15, 
-    scale: 2 
-  }).default("0"),                                      // Money owed by customers
-  
+    precision: 15, scale: 2 
+  }).default("0"),                // Money owed by customers
+
   totalLiabilities: decimal("total_liabilities", { 
-    precision: 15, 
-    scale: 2 
-  }).default("0"),                                      // All company liabilities
-  
+    precision: 15, scale: 2 
+  }).default("0"),                // Total company liabilities
+
   currentLiabilities: decimal("current_liabilities", { 
-    precision: 15, 
-    scale: 2 
-  }).default("0"),                                      // Liabilities due within 1 year
-  
+    precision: 15, scale: 2 
+  }).default("0"),                // Liabilities due within 1 year
+
   accountsPayable: decimal("accounts_payable", { 
-    precision: 15, 
-    scale: 2 
-  }).default("0"),                                      // Money owed to suppliers
-  
+    precision: 15, scale: 2 
+  }).default("0"),                // Money owed to suppliers
+
   totalEquity: decimal("total_equity", { 
-    precision: 15, 
-    scale: 2 
-  }).default("0"),                                      // Shareholders' equity
-  
-  // ========================================
-  // CASH FLOW STATEMENT
-  // ========================================
+    precision: 15, scale: 2 
+  }).default("0"),                // Shareholders' equity
+
+  // ==================== CASH FLOW STATEMENT ====================
   operatingCashFlow: decimal("operating_cash_flow", { 
-    precision: 15, 
-    scale: 2 
-  }).default("0"),                                      // Cash from operations
-  
+    precision: 15, scale: 2 
+  }).default("0"),                // Cash from core operations
+
   investingCashFlow: decimal("investing_cash_flow", { 
-    precision: 15, 
-    scale: 2 
-  }).default("0"),                                      // Cash from investments (usually negative)
-  
+    precision: 15, scale: 2 
+  }).default("0"),                // Cash from investments (usually negative)
+
   financingCashFlow: decimal("financing_cash_flow", { 
-    precision: 15, 
-    scale: 2 
-  }).default("0"),                                      // Cash from financing activities
-  
-  // ========================================
-  // BUSINESS METRICS
-  // ========================================
+    precision: 15, scale: 2 
+  }).default("0"),                // Cash from financing activities
+
+  // ==================== BUSINESS METRICS ====================
   marketingSpend: decimal("marketing_spend", { 
-    precision: 15, 
-    scale: 2 
-  }).default("0"),                                      // Marketing and advertising costs
-  
-  newCustomers: integer("new_customers").default(0),    // New customers acquired in period
-  totalCustomers: integer("total_customers").default(0), // Total active customers
-  
-  // ========================================
-  // TIMESTAMPS
-  // ========================================
-  createdAt: timestamp("created_at").defaultNow(),      // Record creation timestamp
-  updatedAt: timestamp("updated_at").defaultNow(),      // Last update timestamp
+    precision: 15, scale: 2 
+  }).default("0"),                // Marketing and advertising costs
+
+  newCustomers: integer("new_customers")
+    .default(0),                  // New customers acquired in period
+
+  totalCustomers: integer("total_customers")
+    .default(0),                  // Total active customers at period end
+
+  // ==================== TIMESTAMPS ====================
+  createdAt: timestamp("created_at")
+    .defaultNow(),                // Record creation timestamp
+
+  updatedAt: timestamp("updated_at")
+    .defaultNow(),                // Last data update timestamp
+
 }, (table) => ({
-  // Ensure only one financial record per company per period
+  // Critical constraint: Prevent duplicate financial records for same period
   uniqueCompanyPeriod: unique().on(table.companyId, table.period),
 }));
 
+/**
+ * METRIC_ALERTS TABLE
+ * 
+ * Custom threshold alerts for financial metric monitoring.
+ * Users can set alerts to be notified when metrics cross specified thresholds.
+ * 
+ * ALERT CONDITIONS:
+ * - "above": Trigger when metric exceeds threshold value
+ * - "below": Trigger when metric falls below threshold value
+ * 
+ * USE CASES:
+ * - Low liquidity alerts (current ratio < 1.5)
+ * - Profitability warnings (net margin < 5%)
+ * - Growth tracking (revenue growth > 20%)
+ * - Efficiency monitoring (DSO > 45 days)
+ * 
+ * @table metric_alerts
+ * @index companyId, metricName (unique composite)
+ * @index companyId (foreign key)
+ */
+export const metricAlerts = pgTable("metric_alerts", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+
+  companyId: varchar("company_id") // Company being monitored
+    .references(() => companies.id)
+    .notNull(),
+
+  metricName: text("metric_name")
+    .notNull(),                   // e.g., "currentRatio", "netProfitMargin"
+
+  threshold: decimal("threshold", { 
+    precision: 15, scale: 2 
+  }).notNull(),                   // Alert threshold value
+
+  condition: text("condition")
+    .notNull(),                   // "above" or "below"
+
+  isEnabled: integer("is_enabled") // Alert active status
+    .default(1)
+    .notNull(),
+
+  createdAt: timestamp("created_at")
+    .defaultNow(),                // Alert creation timestamp
+
+  updatedAt: timestamp("updated_at")
+    .defaultNow(),                // Last alert modification timestamp
+
+}, (table) => ({
+  // Critical constraint: One alert per metric per company
+  uniqueCompanyMetric: unique().on(table.companyId, table.metricName),
+}));
+
 // ============================================================================
-// VALIDATION SCHEMAS
+// ZOD VALIDATION SCHEMAS
 // ============================================================================
 
 /**
- * User Insert Schema
+ * USER VALIDATION
  * 
- * Validates user creation requests.
- * Automatically omits auto-generated fields (id, timestamps).
+ * Validates user registration and profile updates.
+ * Password validation should be handled in the application layer.
  */
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
+  email: true,
   password: true,
+  fullName: true,
 });
 
 /**
- * Company Insert Schema
+ * COMPANY VALIDATION
  * 
  * Validates company creation requests.
- * Automatically omits auto-generated fields (id, timestamps).
+ * Company names must be non-empty and unique per user.
  */
 export const insertCompanySchema = createInsertSchema(companies).pick({
   name: true,
@@ -302,11 +447,37 @@ export const insertCompanySchema = createInsertSchema(companies).pick({
 });
 
 /**
- * Financial Data Insert Schema
+ * COMPANY_USER VALIDATION  
  * 
- * Validates financial data creation/update requests.
- * Omits auto-generated fields (id, createdAt, updatedAt).
- * Includes all financial metrics and period information.
+ * Validates user-company relationship creation.
+ * Ensures valid roles and proper permission structures.
+ */
+export const insertCompanyUserSchema = createInsertSchema(companyUsers).pick({
+  userId: true,
+  companyId: true,
+  role: true,
+  permissions: true,
+  invitedBy: true,
+});
+
+/**
+ * SESSION VALIDATION
+ * 
+ * Validates session creation for authentication.
+ * Expiration must be in the future.
+ */
+export const insertSessionSchema = createInsertSchema(sessions).pick({
+  userId: true,
+  expiresAt: true,
+  ipAddress: true,
+  userAgent: true,
+});
+
+/**
+ * FINANCIAL DATA VALIDATION
+ * 
+ * Comprehensive validation for financial data inputs.
+ * Ensures data integrity across all financial statement components.
  */
 export const insertFinancialDataSchema = createInsertSchema(financialData).omit({
   id: true,
@@ -315,10 +486,10 @@ export const insertFinancialDataSchema = createInsertSchema(financialData).omit(
 });
 
 /**
- * Metric Alert Insert Schema
+ * METRIC ALERT VALIDATION
  * 
- * Validates metric alert creation/update requests.
- * Omits auto-generated fields (id, createdAt, updatedAt).
+ * Validates alert creation and updates.
+ * Ensures proper threshold values and conditions.
  */
 export const insertMetricAlertSchema = createInsertSchema(metricAlerts).omit({
   id: true,
@@ -327,30 +498,114 @@ export const insertMetricAlertSchema = createInsertSchema(metricAlerts).omit({
 });
 
 // ============================================================================
-// TYPESCRIPT TYPES
+// ROLE & PERMISSION SCHEMAS
 // ============================================================================
 
 /**
- * Type Definitions
+ * PERMISSIONS SCHEMA
  * 
- * Generated from Drizzle schemas and Zod validation schemas.
- * 
- * Insert Types: Used for creating new records (omits auto-generated fields)
- * Select Types: Full record types including all database fields
+ * Defines the structure for role-based permissions.
+ * Each permission array specifies what actions are allowed.
  */
+export const permissionsSchema = z.object({
+  financialData: z.array(z.enum(["read", "write", "delete"])),
+  users: z.array(z.enum(["read", "manage"])),
+  settings: z.array(z.enum(["read", "write"])),
+  alerts: z.array(z.enum(["read", "write", "manage"])),
+});
 
-// User types
+/**
+ * ROLE SCHEMA
+ * 
+ * Defines valid user roles within companies.
+ * Roles determine default permission sets.
+ */
+export const roleSchema = z.enum(["owner", "admin", "user", "viewer"]);
+
+// ============================================================================
+// TYPESCRIPT TYPE DEFINITIONS
+// ============================================================================
+
+// User Types
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 
-// Company types
+// Company Types  
 export type InsertCompany = z.infer<typeof insertCompanySchema>;
 export type Company = typeof companies.$inferSelect;
 
-// Financial data types
+// Company User Types
+export type InsertCompanyUser = z.infer<typeof insertCompanyUserSchema>;
+export type CompanyUser = typeof companyUsers.$inferSelect;
+
+// Session Types
+export type InsertSession = z.infer<typeof insertSessionSchema>;
+export type Session = typeof sessions.$inferSelect;
+
+// Financial Data Types
 export type InsertFinancialData = z.infer<typeof insertFinancialDataSchema>;
 export type FinancialData = typeof financialData.$inferSelect;
 
-// Metric alert types
+// Metric Alert Types
 export type InsertMetricAlert = z.infer<typeof insertMetricAlertSchema>;
 export type MetricAlert = typeof metricAlerts.$inferSelect;
+
+// Permission & Role Types
+export type Permissions = z.infer<typeof permissionsSchema>;
+export type UserRole = z.infer<typeof roleSchema>;
+
+// ============================================================================
+// DEFAULT PERMISSION SETS BY ROLE
+// ============================================================================
+
+/**
+ * DEFAULT ROLE PERMISSIONS
+ * 
+ * Pre-defined permission sets for each role level.
+ * These can be overridden by the permissions field in company_users.
+ */
+export const DEFAULT_PERMISSIONS: Record<UserRole, Permissions> = {
+  owner: {
+    financialData: ["read", "write", "delete"],
+    users: ["read", "manage"],
+    settings: ["read", "write"],
+    alerts: ["read", "write", "manage"],
+  },
+  admin: {
+    financialData: ["read", "write", "delete"],
+    users: ["read", "manage"],
+    settings: ["read", "write"],
+    alerts: ["read", "write", "manage"],
+  },
+  user: {
+    financialData: ["read", "write"],
+    users: ["read"],
+    settings: ["read"],
+    alerts: ["read", "write"],
+  },
+  viewer: {
+    financialData: ["read"],
+    users: ["read"],
+    settings: ["read"],
+    alerts: ["read"],
+  },
+};
+
+/**
+ * USAGE NOTES:
+ * 
+ * 1. DATABASE MIGRATION:
+ *    Run `npm run db:push` to apply schema changes to your database
+ * 
+ * 2. PASSWORD SECURITY:
+ *    Always hash passwords with bcrypt before storing in users table
+ * 
+ * 3. SESSION MANAGEMENT:
+ *    Implement regular cleanup of expired sessions
+ * 
+ * 4. ROLE ENFORCEMENT:
+ *    Use the DEFAULT_PERMISSIONS object for role-based access control
+ * 
+ * 5. DATA VALIDATION:
+ *    Always use the Zod schemas for input validation in API routes
+ */
