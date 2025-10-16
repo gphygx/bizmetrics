@@ -252,7 +252,7 @@ app.get("/health", (req, res) => {
      * 
      * SECURITY: Binding to 0.0.0.0 allows external connections (required for cloud).
      */
-    const port = parseInt(process.env.PORT || '5000', 10);
+    const port = parseInt(process.env.PORT || '3000', 10);
 
     server.listen({
       port,

@@ -59,8 +59,8 @@ DATABASE_URL=postgresql://user:password@localhost:5432/bizmetrics
 # Session Secret (generate a secure random string)
 SESSION_SECRET=your-super-secret-session-key-change-this
 
-# Application Port (default: 5000)
-PORT=5000
+# Application Port (default: 3000)
+PORT=3000
 
 # Node Environment
 NODE_ENV=production
@@ -250,9 +250,9 @@ sudo journalctl -u bizmetrics -f
 - View error logs: `pm2 logs bizmetrics` or `sudo journalctl -u bizmetrics`
 
 ### Nginx 502 Bad Gateway
-- Ensure Node.js backend is running on port 5000
+- Ensure Node.js backend is running on port 3000
 - Check backend logs for errors
-- Verify Nginx can connect to localhost:5000
+- Verify Nginx can connect to localhost:3000
 
 ### Database connection errors
 - Check DATABASE_URL is correct

@@ -44,5 +44,5 @@ echo "✅ Database: $DATABASE_URL"
 echo "✅ Build files found"
 
 # Start the application
-echo "🌟 Starting BizMetrics server on port 5000..."
+echo "🌟 Starting BizMetrics server on port 3000..."
 node dist/index.js
