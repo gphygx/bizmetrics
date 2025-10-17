@@ -144,6 +144,14 @@ Preferred communication style: Simple, everyday language.
 - Full test coverage with end-to-end playwright tests
 - Located in `client/src/components/financial-data-form.tsx`
 
+**Production Deployment Infrastructure** (October 17, 2025): Multiple deployment options created:
+- **Traditional nginx + PM2** (DEPLOYMENT.md): Complete manual setup guide with nginx configuration, systemd service, SSL setup
+- **CloudPanel GUI** (CLOUDPANEL-DEPLOY.md): User-friendly visual deployment for Hostinger VPS with automatic nginx, SSL, and process management
+- Port configuration updated to 3000 for production (development uses 5000 on Replit)
+- Production build system compiles to pure JavaScript (~950KB frontend + 49KB backend)
+- All deployment files include database migration steps (npm run db:push)
+- Health check endpoint: /health
+
 **Development Tools** (Replit-specific):
 - `@replit/vite-plugin-runtime-error-modal` for error overlays
 - `@replit/vite-plugin-cartographer` for code navigation
