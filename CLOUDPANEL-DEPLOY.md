@@ -140,20 +140,51 @@ nano .env
 Add your configuration:
 
 ```env
-# Database (Neon PostgreSQL)
-DATABASE_URL=postgresql://username:password@host/database?sslmode=require
+# ============================================================================
+# DATABASE (Neon PostgreSQL)
+# ============================================================================
+# Get from: https://console.neon.tech → Your project → Connection Details
+# IMPORTANT: Include ?sslmode=require at the end!
+#
+# Format: postgresql://username:password@hostname/database?sslmode=require
+# Example: postgresql://bizmetrics_owner:Abc123XyZ@ep-cool-sun-123.us-east-2.aws.neon.tech/bizmetrics?sslmode=require
+#
+DATABASE_URL=postgresql://your-user:your-password@your-host.neon.tech/your-database?sslmode=require
 
-# Session Security
-SESSION_SECRET=your-super-secret-random-string-change-this
+# ============================================================================
+# SESSION SECRET (Required for security)
+# ============================================================================
+# Must be a long random string (20+ characters)
+# Generate one with: openssl rand -base64 32
+#
+SESSION_SECRET=your-super-secret-random-string-change-this-min-20-chars
 
-# Production Settings
+# ============================================================================
+# SERVER SETTINGS
+# ============================================================================
 NODE_ENV=production
 PORT=3000
 ```
 
-**Save and exit**: Press `Ctrl+X`, then `Y`, then `Enter`
+**How to get your DATABASE_URL from Neon:**
 
-> **Security**: Generate SESSION_SECRET with: `openssl rand -base64 32`
+1. Go to https://console.neon.tech
+2. Select your BizMetrics project
+3. Click "Connection Details"
+4. Copy the connection string
+5. Make sure it ends with `?sslmode=require`
+
+**Generate SESSION_SECRET:**
+
+```bash
+openssl rand -base64 32
+```
+
+Copy the output and paste it as your SESSION_SECRET value.
+
+**Save and exit nano**: Press `Ctrl+X`, then `Y`, then `Enter`
+
+> **Security Warning**: Never share your .env file or commit it to Git!
 
 ---
 
