@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  # ============================================================================
+  # BIZMETRICS APPLICATION
+  # ============================================================================
+  bizmetrics:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: bizmetrics-app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      # Database connection (use your Neon PostgreSQL URL)
+      DATABASE_URL: ${DATABASE_URL}
+      
+      # Session secret (generate with: openssl rand -base64 32)
+      SESSION_SECRET: ${SESSION_SECRET}
+      
+      # Server configuration
+      NODE_ENV: production
+      PORT: 3000
+    
+    # Health check
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    
+    # Logging configuration
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+# ============================================================================
+# NETWORKS (optional - for future expansion)
+# ============================================================================
+networks:
+  default:
+    name: bizmetrics-network

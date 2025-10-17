@@ -1,0 +1,55 @@
+# Node modules
+node_modules
+npm-debug.log
+yarn-error.log
+
+# Build output (will be created during build)
+dist
+
+# Development files
+.git
+.gitignore
+*.md
+!README.md
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment files (use docker-compose environment instead)
+.env
+.env.local
+.env.*.local
+
+# Test files
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.ts
+**/*.spec.tsx
+coverage
+
+# CI/CD
+.github
+.gitlab-ci.yml
+.travis.yml
+
+# Documentation (except README)
+docs
+DEPLOYMENT.md
+CLOUDPANEL-DEPLOY.md
+
+# Logs
+logs
+*.log
+
+# Temporary files
+tmp
+temp
+*.tmp
