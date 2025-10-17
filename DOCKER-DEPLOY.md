@@ -100,7 +100,7 @@ docker compose build
 docker compose run --rm bizmetrics npm run db:push
 ```
 
-If you see warnings about data loss:
+If you see warnings about data loss or configuration errors:
 ```bash
 docker compose run --rm bizmetrics npm run db:push --force
 ```
@@ -109,6 +109,18 @@ Expected output:
 ```
 ✓ Pushing schema changes to database
 ✓ Tables created successfully
+```
+
+**Troubleshooting: "no configuration file provided" error**
+
+If you see this error, it means drizzle-kit can't find the config file. Try:
+
+```bash
+# Rebuild the image to ensure all files are copied
+docker compose build --no-cache
+
+# Then run migration again
+docker compose run --rm bizmetrics npm run db:push --force
 ```
 
 **Start the application:**

@@ -39,6 +39,7 @@ COPY --from=builder /app/dist ./dist
 
 # Copy database migration files (needed for npm run db:push)
 COPY drizzle.config.ts ./
+COPY drizzle.config.js ./
 COPY shared ./shared
 
 # Create non-root user for security
