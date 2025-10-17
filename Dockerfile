@@ -30,9 +30,9 @@ FROM node:20-alpine AS production
 
 WORKDIR /app
 
-# Install production dependencies only
+# Install ALL dependencies (including dev) because drizzle-kit is needed for migrations
 COPY package*.json ./
-RUN npm ci --omit=dev
+RUN npm ci
 
 # Copy built application from builder stage
 COPY --from=builder /app/dist ./dist
