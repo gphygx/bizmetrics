@@ -144,12 +144,14 @@ Preferred communication style: Simple, everyday language.
 - Full test coverage with end-to-end playwright tests
 - Located in `client/src/components/financial-data-form.tsx`
 
-**Production Deployment Infrastructure** (October 17, 2025): Multiple deployment options created:
+**Production Deployment Infrastructure** (October 17, 2025): Three deployment options created:
+- **Docker** (DOCKER-DEPLOY.md): Simplest option - containerized deployment works on any cloud, just 3 commands to deploy
 - **Traditional nginx + PM2** (DEPLOYMENT.md): Complete manual setup guide with nginx configuration, systemd service, SSL setup
-- **CloudPanel GUI** (CLOUDPANEL-DEPLOY.md): User-friendly visual deployment for Hostinger VPS with automatic nginx, SSL, and process management
-- Port configuration updated to 3000 for production (development uses 5000 on Replit)
-- Production build system compiles to pure JavaScript (~950KB frontend + 49KB backend)
-- All deployment files include database migration steps (npm run db:push)
+- **CloudPanel GUI** (CLOUDPANEL-DEPLOY.md): Visual deployment for Hostinger VPS with SSH + PM2 process management
+- Port configuration: 3000 for production, 5000 for development (Replit)
+- Production build: Pure JavaScript (~950KB frontend + 49KB backend in dist/)
+- All deployment methods include database migration steps (npm run db:push)
+- Multi-stage Dockerfile with Alpine Linux for optimized 200MB image
 - Health check endpoint: /health
 
 **Development Tools** (Replit-specific):
