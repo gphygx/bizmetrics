@@ -28,7 +28,9 @@ import {
   users, 
   companies, 
   financialData, 
-  metricAlerts, 
+  metricAlerts,
+  sessions,
+  companyUsers,
   type User, 
   type InsertUser, 
   type Company, 
@@ -36,7 +38,11 @@ import {
   type FinancialData, 
   type InsertFinancialData, 
   type MetricAlert, 
-  type InsertMetricAlert 
+  type InsertMetricAlert,
+  type Session,
+  type InsertSession,
+  type CompanyUser,
+  type InsertCompanyUser
 } from '@shared/schema';
 import type { IStorage } from './storage';
 import ws from 'ws';
@@ -366,5 +372,135 @@ export class DbStorage implements IStorage {
     await db
       .delete(metricAlerts)
       .where(eq(metricAlerts.id, id));
+  }
+
+  // ==========================================================================
+  // SESSION MANAGEMENT METHODS
+  // ==========================================================================
+
+  async getSession(id: string): Promise<Session | undefined> {
+    const result = await db
+      .select()
+      .from(sessions)
+      .where(eq(sessions.id, id))
+      .limit(1);
+    
+    const session = result[0];
+    
+    // Check if session is expired
+    if (session && new Date(session.expiresAt) < new Date()) {
+      await this.deleteSession(id);
+      return undefined;
+    }
+    
+    return session;
+  }
+
+  async createSession(insertSession: InsertSession): Promise<Session> {
+    const result = await db
+      .insert(sessions)
+      .values(insertSession)
+      .returning();
+    return result[0];
+  }
+
+  async updateSessionActivity(id: string): Promise<Session | undefined> {
+    const result = await db
+      .update(sessions)
+      .set({ lastActive: new Date() })
+      .where(eq(sessions.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async deleteSession(id: string): Promise<boolean> {
+    await db
+      .delete(sessions)
+      .where(eq(sessions.id, id));
+    return true;
+  }
+
+  async cleanupExpiredSessions(): Promise<number> {
+    const now = new Date();
+    const result = await db
+      .delete(sessions)
+      .where(lte(sessions.expiresAt, now))
+      .returning();
+    return result.length;
+  }
+
+  // ==========================================================================
+  // USER UPDATE METHODS
+  // ==========================================================================
+
+  async updateUser(id: string, updates: Partial<InsertUser>): Promise<User | undefined> {
+    const result = await db
+      .update(users)
+      .set(updates)
+      .where(eq(users.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async verifyUserEmail(id: string): Promise<User | undefined> {
+    const result = await db
+      .update(users)
+      .set({ emailVerified: true })
+      .where(eq(users.id, id))
+      .returning();
+    return result[0];
+  }
+
+  // ==========================================================================
+  // COMPANY UPDATE METHODS
+  // ==========================================================================
+
+  async updateCompany(id: string, updates: Partial<InsertCompany>): Promise<Company | undefined> {
+    const result = await db
+      .update(companies)
+      .set(updates)
+      .where(eq(companies.id, id))
+      .returning();
+    return result[0];
+  }
+
+  // ==========================================================================
+  // COMPANY USER METHODS
+  // ==========================================================================
+
+  async getCompanyUser(userId: string, companyId: string): Promise<CompanyUser | undefined> {
+    const result = await db
+      .select()
+      .from(companyUsers)
+      .where(and(
+        eq(companyUsers.userId, userId),
+        eq(companyUsers.companyId, companyId)
+      ))
+      .limit(1);
+    return result[0];
+  }
+
+  async createCompanyUser(insertCompanyUser: InsertCompanyUser): Promise<CompanyUser> {
+    const result = await db
+      .insert(companyUsers)
+      .values(insertCompanyUser)
+      .returning();
+    return result[0];
+  }
+
+  async updateCompanyUser(id: string, updates: Partial<InsertCompanyUser>): Promise<CompanyUser | undefined> {
+    const result = await db
+      .update(companyUsers)
+      .set(updates)
+      .where(eq(companyUsers.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async removeCompanyUser(id: string): Promise<boolean> {
+    await db
+      .delete(companyUsers)
+      .where(eq(companyUsers.id, id));
+    return true;
   }
 }
