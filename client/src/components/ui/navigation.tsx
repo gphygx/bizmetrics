@@ -1,7 +1,11 @@
 import { Link, useLocation } from "wouter";
+import { useAuth } from "@/hooks/use-auth";
+import { Button } from "@/components/ui/button";
+import { LogOut } from "lucide-react";
 
 export default function Navigation() {
   const [location] = useLocation();
+  const { user, logout } = useAuth();
 
   const navItems = [
     { href: "/dashboard", icon: "fas fa-tachometer-alt", label: "Dashboard" },
@@ -85,16 +89,25 @@ export default function Navigation() {
       
       <div className="p-4 border-t border-border">
         <div className="flex items-center gap-3 px-3 py-2">
-          <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center">
-            <span className="text-sm font-medium text-muted-foreground">JD</span>
+          <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+            <span className="text-sm font-medium text-primary-foreground">
+              {user?.username?.substring(0, 2).toUpperCase() || "U"}
+            </span>
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-foreground truncate">John Doe</p>
-            <p className="text-xs text-muted-foreground truncate">john@company.com</p>
+            <p className="text-sm font-medium text-foreground truncate">{user?.fullName || user?.username || "User"}</p>
+            <p className="text-xs text-muted-foreground truncate">{user?.email || ""}</p>
           </div>
-          <button className="text-muted-foreground hover:text-foreground" data-testid="user-menu">
-            <i className="fas fa-ellipsis-h"></i>
-          </button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={logout}
+            className="text-muted-foreground hover:text-foreground"
+            data-testid="button-logout"
+            title="Logout"
+          >
+            <LogOut className="h-4 w-4" />
+          </Button>
         </div>
       </div>
     </aside>
