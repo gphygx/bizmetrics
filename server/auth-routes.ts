@@ -281,6 +281,14 @@ authRouter.post("/login", async (req: Request, res: Response) => {
     // Create new session
     const session = await createUserSession(user.id, req);
 
+    // Set session cookie
+    res.cookie("sessionId", session.id, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+
     // Update user's last login timestamp (if you add that field)
     await storage.updateUser(user.id, { updatedAt: new Date() });
 
