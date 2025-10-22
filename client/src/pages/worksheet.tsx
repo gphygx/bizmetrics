@@ -100,12 +100,38 @@ export default function Worksheet() {
 
   const createCompanyMutation = useMutation({
     mutationFn: async (name: string) => {
-      const res = await apiRequest("POST", "/api/companies", { name, userId: user?.id });
-      return await res.json();
+      if (!user?.id) {
+        throw new Error("User not authenticated");
+      }
+      console.log("Creating company with name:", name, "userId:", user.id);
+      try {
+        const res = await apiRequest("POST", "/api/companies", { 
+          name: name,
+          userId: user.id 
+        });
+        const data = await res.json();
+        console.log("Company created successfully:", data);
+        return data;
+      } catch (error) {
+        console.error("Error creating company:", error);
+        throw error;
+      }
     },
     onSuccess: (newCompany) => {
       queryClient.invalidateQueries({ queryKey: ["/api/companies"] });
       form.setValue("companyId", newCompany.id);
+      toast({
+        title: "Success",
+        description: `Company "${newCompany.name}" created successfully`,
+      });
+    },
+    onError: (error: Error) => {
+      console.error("Company creation mutation error:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create company",
+        variant: "destructive",
+      });
     },
   });
 
