@@ -307,7 +307,7 @@ export default function Worksheet() {
                       <FormItem>
                         <FormLabel>Total Revenue</FormLabel>
                         <FormControl>
-                          <Input type="number" step="0.01" {...field} data-testid="input-revenue" />
+                          <Input type="number" step="0.01" {...field} value={field.value ?? ""} data-testid="input-revenue" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -321,7 +321,7 @@ export default function Worksheet() {
                       <FormItem>
                         <FormLabel>Cost of Goods Sold</FormLabel>
                         <FormControl>
-                          <Input type="number" step="0.01" {...field} data-testid="input-cogs" />
+                          <Input type="number" step="0.01" {...field} value={field.value ?? ""} data-testid="input-cogs" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -335,7 +335,7 @@ export default function Worksheet() {
                       <FormItem>
                         <FormLabel>Gross Profit</FormLabel>
                         <FormControl>
-                          <Input type="number" step="0.01" {...field} data-testid="input-gross-profit" />
+                          <Input type="number" step="0.01" {...field} value={field.value ?? ""} data-testid="input-gross-profit" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -349,7 +349,7 @@ export default function Worksheet() {
                       <FormItem>
                         <FormLabel>Operating Expenses</FormLabel>
                         <FormControl>
-                          <Input type="number" step="0.01" {...field} data-testid="input-opex" />
+                          <Input type="number" step="0.01" {...field} value={field.value ?? ""} data-testid="input-opex" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -363,7 +363,7 @@ export default function Worksheet() {
                       <FormItem>
                         <FormLabel>Operating Income</FormLabel>
                         <FormControl>
-                          <Input type="number" step="0.01" {...field} data-testid="input-operating-income" />
+                          <Input type="number" step="0.01" {...field} value={field.value ?? ""} data-testid="input-operating-income" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -377,7 +377,7 @@ export default function Worksheet() {
                       <FormItem>
                         <FormLabel>Net Income</FormLabel>
                         <FormControl>
-                          <Input type="number" step="0.01" {...field} data-testid="input-net-income" />
+                          <Input type="number" step="0.01" {...field} value={field.value ?? ""} data-testid="input-net-income" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -402,7 +402,7 @@ export default function Worksheet() {
                       <FormItem>
                         <FormLabel>Total Assets</FormLabel>
                         <FormControl>
-                          <Input type="number" step="0.01" {...field} data-testid="input-total-assets" />
+                          <Input type="number" step="0.01" {...field} value={field.value ?? ""} data-testid="input-total-assets" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -416,7 +416,7 @@ export default function Worksheet() {
                       <FormItem>
                         <FormLabel>Current Assets</FormLabel>
                         <FormControl>
-                          <Input type="number" step="0.01" {...field} data-testid="input-current-assets" />
+                          <Input type="number" step="0.01" {...field} value={field.value ?? ""} data-testid="input-current-assets" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -430,7 +430,7 @@ export default function Worksheet() {
                       <FormItem>
                         <FormLabel>Inventory</FormLabel>
                         <FormControl>
-                          <Input type="number" step="0.01" {...field} data-testid="input-inventory" />
+                          <Input type="number" step="0.01" {...field} value={field.value ?? ""} data-testid="input-inventory" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -444,7 +444,7 @@ export default function Worksheet() {
                       <FormItem>
                         <FormLabel>Accounts Receivable</FormLabel>
                         <FormControl>
-                          <Input type="number" step="0.01" {...field} data-testid="input-ar" />
+                          <Input type="number" step="0.01" {...field} value={field.value ?? ""} data-testid="input-ar" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -458,7 +458,7 @@ export default function Worksheet() {
                       <FormItem>
                         <FormLabel>Total Liabilities</FormLabel>
                         <FormControl>
-                          <Input type="number" step="0.01" {...field} data-testid="input-total-liabilities" />
+                          <Input type="number" step="0.01" {...field} value={field.value ?? ""} data-testid="input-total-liabilities" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -472,7 +472,7 @@ export default function Worksheet() {
                       <FormItem>
                         <FormLabel>Current Liabilities</FormLabel>
                         <FormControl>
-                          <Input type="number" step="0.01" {...field} data-testid="input-current-liabilities" />
+                          <Input type="number" step="0.01" {...field} value={field.value ?? ""} data-testid="input-current-liabilities" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -486,7 +486,7 @@ export default function Worksheet() {
                       <FormItem>
                         <FormLabel>Accounts Payable</FormLabel>
                         <FormControl>
-                          <Input type="number" step="0.01" {...field} data-testid="input-ap" />
+                          <Input type="number" step="0.01" {...field} value={field.value ?? ""} data-testid="input-ap" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -500,7 +500,7 @@ export default function Worksheet() {
                       <FormItem>
                         <FormLabel>Total Equity</FormLabel>
                         <FormControl>
-                          <Input type="number" step="0.01" {...field} data-testid="input-total-equity" />
+                          <Input type="number" step="0.01" {...field} value={field.value ?? ""} data-testid="input-total-equity" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -525,7 +525,7 @@ export default function Worksheet() {
                       <FormItem>
                         <FormLabel>Operating Cash Flow</FormLabel>
                         <FormControl>
-                          <Input type="number" step="0.01" {...field} data-testid="input-ocf" />
+                          <Input type="number" step="0.01" {...field} value={field.value ?? ""} data-testid="input-ocf" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -539,7 +539,7 @@ export default function Worksheet() {
                       <FormItem>
                         <FormLabel>Investing Cash Flow</FormLabel>
                         <FormControl>
-                          <Input type="number" step="0.01" {...field} data-testid="input-icf" />
+                          <Input type="number" step="0.01" {...field} value={field.value ?? ""} data-testid="input-icf" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -553,7 +553,7 @@ export default function Worksheet() {
                       <FormItem>
                         <FormLabel>Financing Cash Flow</FormLabel>
                         <FormControl>
-                          <Input type="number" step="0.01" {...field} data-testid="input-fcf" />
+                          <Input type="number" step="0.01" {...field} value={field.value ?? ""} data-testid="input-fcf" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -578,7 +578,7 @@ export default function Worksheet() {
                       <FormItem>
                         <FormLabel>Marketing Spend</FormLabel>
                         <FormControl>
-                          <Input type="number" step="0.01" {...field} data-testid="input-marketing-spend" />
+                          <Input type="number" step="0.01" {...field} value={field.value ?? ""} data-testid="input-marketing-spend" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -595,6 +595,7 @@ export default function Worksheet() {
                           <Input
                             type="number"
                             {...field}
+                            value={field.value ?? 0}
                             onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
                             data-testid="input-new-customers"
                           />
@@ -614,6 +615,7 @@ export default function Worksheet() {
                           <Input
                             type="number"
                             {...field}
+                            value={field.value ?? 0}
                             onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
                             data-testid="input-total-customers"
                           />

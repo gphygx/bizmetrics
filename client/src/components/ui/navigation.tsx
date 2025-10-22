@@ -12,6 +12,7 @@ export default function Navigation() {
     { href: "/transactions", icon: "fas fa-receipt", label: "Transactions" },
     { href: "/invoices", icon: "fas fa-file-invoice-dollar", label: "Invoices" },
     { href: "/financial-metrics", icon: "fas fa-chart-bar", label: "Financial Metrics" },
+    { href: "/worksheet", icon: "fas fa-table", label: "Worksheet" },
     { href: "/reports", icon: "fas fa-file-alt", label: "Reports" },
     { href: "/contacts", icon: "fas fa-users", label: "Contacts" }
   ];

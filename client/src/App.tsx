@@ -11,6 +11,7 @@ import Invoices from "@/pages/invoices";
 import FinancialMetrics from "@/pages/financial-metrics";
 import Reports from "@/pages/reports";
 import Contacts from "@/pages/contacts";
+import Worksheet from "@/pages/worksheet";
 import LoginPage from "@/pages/login";
 import Navigation from "@/components/ui/navigation";
 
@@ -42,6 +43,7 @@ function Router() {
           <Route path="/transactions" component={Transactions} />
           <Route path="/invoices" component={Invoices} />
           <Route path="/financial-metrics" component={FinancialMetrics} />
+          <Route path="/worksheet" component={Worksheet} />
           <Route path="/reports" component={Reports} />
           <Route path="/contacts" component={Contacts} />
           <Route component={NotFound} />
