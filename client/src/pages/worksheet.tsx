@@ -1,6 +1,6 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { insertFinancialDataSchema, type InsertFinancialData } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -26,7 +26,7 @@ export default function Worksheet() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [saveToDatabase, setSaveToDatabase] = useState(true);
-  const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
+  const [companyName, setCompanyName] = useState<string>("");
 
   // Fetch companies for the logged-in user
   const { data: companies = [] } = useQuery<Company[]>({
@@ -64,13 +64,17 @@ export default function Worksheet() {
   });
 
   // Set first company as default when companies load
-  useState(() => {
-    if (companies.length > 0 && !selectedCompanyId) {
-      const firstCompany = companies[0].id;
-      setSelectedCompanyId(firstCompany);
-      form.setValue("companyId", firstCompany);
+  useEffect(() => {
+    if (companies.length > 0 && !companyName) {
+      const firstCompany = companies[0];
+      setCompanyName(firstCompany.name);
+      form.setValue("companyId", firstCompany.id, { 
+        shouldValidate: true,
+        shouldDirty: true,
+        shouldTouch: true
+      });
     }
-  });
+  }, [companies, companyName, form]);
 
   const createMutation = useMutation({
     mutationFn: async (data: InsertFinancialData) => {
@@ -94,7 +98,50 @@ export default function Worksheet() {
     },
   });
 
-  const onSubmit = (data: InsertFinancialData) => {
+  const createCompanyMutation = useMutation({
+    mutationFn: async (name: string) => {
+      const res = await apiRequest("POST", "/api/companies", { name, userId: user?.id });
+      return await res.json();
+    },
+    onSuccess: (newCompany) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/companies"] });
+      form.setValue("companyId", newCompany.id);
+    },
+  });
+
+  const onSubmit = async (data: InsertFinancialData) => {
+    // If company name is provided but no companyId, create a new company first
+    if (companyName && (!data.companyId || data.companyId === "")) {
+      const matchingCompany = companies.find(c => c.name === companyName);
+      if (matchingCompany) {
+        // Use existing company
+        data.companyId = matchingCompany.id;
+      } else {
+        // Create new company
+        try {
+          const newCompany = await createCompanyMutation.mutateAsync(companyName);
+          data.companyId = newCompany.id;
+        } catch (error) {
+          toast({
+            title: "Error",
+            description: "Failed to create company",
+            variant: "destructive",
+          });
+          return;
+        }
+      }
+    }
+
+    // Validate company is selected
+    if (!data.companyId || data.companyId === "") {
+      toast({
+        title: "Error",
+        description: "Please enter a company name",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (saveToDatabase) {
       createMutation.mutate(data);
     } else {
@@ -221,36 +268,36 @@ export default function Worksheet() {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-3 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="companyId"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Company</FormLabel>
-                        <Select
-                          onValueChange={(value) => {
-                            field.onChange(value);
-                            setSelectedCompanyId(value);
-                          }}
-                          value={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger data-testid="select-company">
-                              <SelectValue placeholder="Select company" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {companies.map((company) => (
-                              <SelectItem key={company.id} value={company.id}>
-                                {company.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
+                  <div className="space-y-2">
+                    <Label htmlFor="company-name">Company Name</Label>
+                    <Input
+                      id="company-name"
+                      placeholder="Enter company name"
+                      value={companyName}
+                      onChange={(e) => {
+                        setCompanyName(e.target.value);
+                        // Clear companyId when typing a new name
+                        const matchingCompany = companies.find(c => c.name === e.target.value);
+                        if (matchingCompany) {
+                          form.setValue("companyId", matchingCompany.id);
+                        } else {
+                          form.setValue("companyId", "");
+                        }
+                      }}
+                      data-testid="input-company-name"
+                      list="companies-list"
+                    />
+                    <datalist id="companies-list">
+                      {companies.map((company) => (
+                        <option key={company.id} value={company.name} />
+                      ))}
+                    </datalist>
+                    {companyName && !companies.find(c => c.name === companyName) && (
+                      <p className="text-xs text-muted-foreground">
+                        New company will be created
+                      </p>
                     )}
-                  />
+                  </div>
 
                   <FormField
                     control={form.control}
